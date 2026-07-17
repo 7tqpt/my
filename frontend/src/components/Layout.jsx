@@ -1,5 +1,6 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { NavLink, useNavigate, useLocation, Outlet } from 'react-router-dom';
+import { listAll } from '../lib/api';
 import {
   LayoutDashboard, Building2, UserCog, DoorOpen, Users, FileText, Wallet,
   Receipt, Wrench, PieChart, Settings as SettingsIcon, Database, UsersRound,
@@ -49,11 +50,63 @@ const COLOR_MAP = {
 export default function Layout() {
   const { user, logout, lang, toggleLang, darkMode, toggleDark, t } = useApp();
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [searchResults, setSearchResults] = useState([]);
+  const [showResults, setShowResults] = useState(false);
   const navigate = useNavigate();
   const location = useLocation();
   const isRTL = lang === 'ar';
 
   const handleLogout = () => { logout(); navigate('/login'); };
+
+  // Global search: query multiple collections when user types
+  useEffect(() => {
+    if (!searchQuery || searchQuery.length < 2) { setSearchResults([]); return; }
+    let cancelled = false;
+    const debounce = setTimeout(async () => {
+      try {
+        const resources = ['owners', 'properties', 'units', 'tenants', 'contracts', 'payments', 'expenses', 'utility_bills', 'maintenance'];
+        const all = await Promise.all(resources.map((r) => listAll(r).catch(() => [])));
+        if (cancelled) return;
+        const q = searchQuery.toLowerCase();
+        const results = [];
+        const searchable = {
+          owners: (r) => `${r.name || ''} ${r.phone || ''} ${r.national_id || ''} ${r.address || ''}`,
+          properties: (r) => `${r.name || ''} ${r.city || ''} ${r.district || ''} ${r.address || ''}`,
+          units: (r) => `${r.unit_number || ''} ${r.floor || ''} ${r.notes || ''}`,
+          tenants: (r) => `${r.name || ''} ${r.phone || ''} ${r.national_id || ''} ${r.company_name || ''}`,
+          contracts: (r) => `${r.contract_number || ''} ${r.terms || ''}`,
+          payments: (r) => `${r.reference_number || ''} ${r.notes || ''}`,
+          expenses: (r) => `${r.description || ''} ${r.vendor || ''} ${r.reference_number || ''}`,
+          utility_bills: (r) => `${r.bill_number || ''} ${r.provider || ''}`,
+          maintenance: (r) => `${r.title || ''} ${r.description || ''} ${r.vendor || ''}`,
+        };
+        const labels = {
+          owners: (r) => r.name, properties: (r) => r.name, units: (r) => r.unit_number,
+          tenants: (r) => r.name, contracts: (r) => r.contract_number,
+          payments: (r) => r.reference_number || t('payments'),
+          expenses: (r) => r.description, utility_bills: (r) => r.bill_number || t('utility_bills'),
+          maintenance: (r) => r.title,
+        };
+        resources.forEach((res, i) => {
+          const rows = all[i] || [];
+          rows.forEach((row) => {
+            if (searchable[res](row).toLowerCase().includes(q)) {
+              results.push({ resource: res, id: row.id, label: labels[res](row), type: t(res) });
+            }
+          });
+        });
+        setSearchResults(results.slice(0, 20));
+      } catch (e) { /* ignore */ }
+    }, 300);
+    return () => { cancelled = true; clearTimeout(debounce); };
+  }, [searchQuery, t]);
+
+  const goToResult = (r) => {
+    setShowResults(false);
+    setSearchQuery('');
+    navigate(`/profile/${r.resource}/${r.id}`);
+  };
 
   return (
     <div className="min-h-screen bg-gray-100 dark:bg-gray-900 text-gray-900 dark:text-gray-100 flex">
@@ -133,8 +186,35 @@ export default function Layout() {
           </button>
           <div className="flex-1 flex justify-center max-w-xl mx-auto">
             <div className="w-full hidden sm:block relative">
-              <input type="text" placeholder={t('search_placeholder')} className={`w-full ${isRTL ? 'pr-11 pl-4' : 'pl-11 pr-4'} py-2.5 text-sm bg-gray-50/80 dark:bg-gray-700/40 border border-gray-200/60 dark:border-gray-600/40 rounded-2xl focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-400 focus:bg-white dark:focus:bg-gray-700/60 text-gray-900 dark:text-gray-100`} />
+              <input
+                type="text"
+                value={searchQuery}
+                onChange={(e) => { setSearchQuery(e.target.value); setShowResults(true); }}
+                onFocus={() => setShowResults(true)}
+                onBlur={() => setTimeout(() => setShowResults(false), 200)}
+                placeholder={t('search_placeholder')}
+                className={`w-full ${isRTL ? 'pr-11 pl-4' : 'pl-11 pr-4'} py-2.5 text-sm bg-gray-50/80 dark:bg-gray-700/40 border border-gray-200/60 dark:border-gray-600/40 rounded-2xl focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-400 focus:bg-white dark:focus:bg-gray-700/60 text-gray-900 dark:text-gray-100`}
+              />
               <Search size={14} className={`absolute ${isRTL ? 'right-4' : 'left-4'} top-1/2 -translate-y-1/2 text-gray-400`} />
+              {showResults && searchQuery.length >= 2 && (
+                <div className="absolute top-full mt-2 w-full bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-700 rounded-2xl shadow-2xl overflow-hidden z-40 max-h-96 overflow-y-auto">
+                  {searchResults.length === 0 ? (
+                    <div className="px-4 py-6 text-center text-sm text-gray-400">{t('no_data')}</div>
+                  ) : searchResults.map((r, i) => (
+                    <button
+                      key={i}
+                      onMouseDown={(e) => { e.preventDefault(); goToResult(r); }}
+                      className="w-full text-start px-4 py-3 hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors border-b border-gray-50 dark:border-gray-700/40 last:border-0 flex items-center justify-between gap-3"
+                    >
+                      <div className="min-w-0 flex-1">
+                        <p className="text-sm font-semibold text-gray-900 dark:text-white truncate">{r.label}</p>
+                        <p className="text-[11px] text-gray-400">{r.type}</p>
+                      </div>
+                      <Search size={12} className="text-gray-300 flex-shrink-0" />
+                    </button>
+                  ))}
+                </div>
+              )}
             </div>
           </div>
           <div className="flex items-center gap-2">

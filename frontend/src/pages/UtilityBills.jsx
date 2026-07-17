@@ -5,7 +5,8 @@ import { useApp } from '../context/AppContext';
 import { useCollection } from '../hooks/useCollection';
 
 export default function UtilityBills() {
-  const { t } = useApp();
+  const { t, lang } = useApp();
+  const isRTL = lang === 'ar';
   const { data, setData } = useCollection('utility_bills');
   const { data: tenants } = useCollection('tenants');
   const { data: units } = useCollection('units');
@@ -64,28 +65,39 @@ export default function UtilityBills() {
     }} /> },
   ];
 
+  const secBill = isRTL ? '📋 معلومات الفاتورة' : '📋 Bill Information';
+  const secParty = isRTL ? '👤 المستأجر والوحدة' : '👤 Tenant & Unit';
+  const secPeriod = isRTL ? '📅 فترة الفوترة' : '📅 Billing Period';
+  const secReadings = isRTL ? '⚡ القراءات والاستهلاك' : '⚡ Readings & Consumption';
+  const secPayment = isRTL ? '💰 الدفع والحالة' : '💰 Payment & Status';
+
   const fields = [
-    { name: 'bill_type', label: t('bill_type'), type: 'select', required: true, options: billTypeOpts },
-    { name: 'provider', label: t('provider'), type: 'text', placeholder: 'SEC / NWC' },
-    { name: 'unit_id', label: t('unit'), type: 'select', required: true, options: units.map(u => {
+    // Bill Identification section
+    { section: secBill, name: 'bill_type', label: t('bill_type'), type: 'select', required: true, options: billTypeOpts },
+    { section: secBill, name: 'provider', label: t('provider'), type: 'text', placeholder: 'SEC / NWC', hint: isRTL ? 'الشركة السعودية للكهرباء / المياه الوطنية' : 'Electric / Water provider' },
+    { section: secBill, name: 'bill_number', label: t('bill_number'), type: 'text', placeholder: 'ELEC-XXXX / WTR-XXXX', colSpan: 2 },
+    // Party / Location
+    { section: secParty, name: 'unit_id', label: t('unit'), type: 'select', required: true, options: units.map(u => {
       const p = properties.find(x => x.id === u.property_id);
       return { value: u.id, label: `${p?.name || ''} - ${u.unit_number}` };
     })},
-    { name: 'tenant_id', label: t('tenant'), type: 'select', required: true, options: tenants.map(x => ({ value: x.id, label: x.name })) },
-    { name: 'bill_number', label: t('bill_number'), type: 'text' },
-    { name: 'issue_date', label: t('issue_date'), type: 'date', required: true },
-    { name: 'period_from', label: t('period_from'), type: 'date', required: true },
-    { name: 'period_to', label: t('period_to'), type: 'date', required: true },
-    { name: 'due_date', label: t('due_date'), type: 'date', required: true },
-    { name: 'payment_date', label: t('payment_date'), type: 'date' },
-    { name: 'previous_reading', label: t('previous_reading'), type: 'number' },
-    { name: 'current_reading', label: t('current_reading'), type: 'number' },
-    { name: 'unit_price', label: t('unit_price'), type: 'number' },
-    { name: 'amount', label: t('amount'), type: 'number', required: true },
-    { name: 'late_fee', label: t('late_fee'), type: 'number' },
-    { name: 'payment_method', label: t('payment_method'), type: 'select', options: methodOpts },
-    { name: 'status', label: t('status'), type: 'select', required: true, options: statusOpts },
-    { name: 'notes', label: t('notes'), type: 'textarea', colSpan: 2 },
+    { section: secParty, name: 'tenant_id', label: t('tenant'), type: 'select', required: true, options: tenants.map(x => ({ value: x.id, label: x.name })) },
+    // Billing Period
+    { section: secPeriod, name: 'period_from', label: t('period_from'), type: 'date', required: true },
+    { section: secPeriod, name: 'period_to', label: t('period_to'), type: 'date', required: true },
+    { section: secPeriod, name: 'issue_date', label: t('issue_date'), type: 'date', required: true },
+    { section: secPeriod, name: 'due_date', label: t('due_date'), type: 'date', required: true },
+    // Readings
+    { section: secReadings, name: 'previous_reading', label: t('previous_reading'), type: 'number', placeholder: isRTL ? 'مثال: 1200' : 'e.g. 1200' },
+    { section: secReadings, name: 'current_reading', label: t('current_reading'), type: 'number', placeholder: isRTL ? 'مثال: 1520' : 'e.g. 1520', hint: isRTL ? 'الاستهلاك = الحالية − السابقة' : 'Consumption = current − previous' },
+    { section: secReadings, name: 'unit_price', label: t('unit_price'), type: 'number', placeholder: isRTL ? 'ريال / وحدة استهلاك' : 'SAR / consumption unit' },
+    // Amount + Payment
+    { section: secPayment, name: 'amount', label: t('amount'), type: 'number', required: true, placeholder: isRTL ? 'المبلغ الإجمالي بالريال' : 'Total amount in SAR' },
+    { section: secPayment, name: 'late_fee', label: t('late_fee'), type: 'number' },
+    { section: secPayment, name: 'payment_method', label: t('payment_method'), type: 'select', options: methodOpts },
+    { section: secPayment, name: 'payment_date', label: t('payment_date'), type: 'date' },
+    { section: secPayment, name: 'status', label: t('status'), type: 'select', required: true, options: statusOpts },
+    { section: secPayment, name: 'notes', label: t('notes'), type: 'textarea', colSpan: 2 },
   ];
 
   return (

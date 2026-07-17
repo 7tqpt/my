@@ -1,100 +1,140 @@
-# Deployment Guide - دليل النشر المجاني
+# 🚀 دليل نشر المشروع مجاناً — GitHub + MongoDB Atlas + Render
 
-هذا الدليل يوضح طريقة نشر المشروع مجاناً على:
-- **GitHub** (استضافة الكود)
-- **MongoDB Atlas** (قاعدة البيانات - Free M0 Cluster)
-- **Render** (الباكاند + الفرونتإند)
+هذا الدليل يشرح خطوة بخطوة كيفية نشر **نظام إدارة العقارات** مجاناً بالكامل عبر:
 
----
+| الخدمة | الدور | التكلفة |
+|---|---|---|
+| **GitHub** | استضافة الكود | مجاني |
+| **MongoDB Atlas** | قاعدة البيانات (M0) | مجاني للأبد (512MB) |
+| **Render** | تشغيل الـ Backend و Frontend | مجاني |
 
-## الخطوة 1: MongoDB Atlas (قاعدة البيانات)
-
-1. اذهب إلى https://cloud.mongodb.com وأنشئ حساب مجاني
-2. أنشئ **Cluster مجاني** (M0 - 512MB)
-3. في **Database Access**: أنشئ مستخدم بكلمة مرور
-4. في **Network Access**: أضف `0.0.0.0/0` (للسماح لـ Render)
-5. احصل على **Connection String**:
-   ```
-   mongodb+srv://<username>:<password>@cluster0.xxxxx.mongodb.net/?retryWrites=true&w=majority
-   ```
-6. **استورد البيانات التجريبية** (اختياري):
-   ```bash
-   mongorestore --uri="YOUR_ATLAS_URI" --nsFrom="test_database.*" --nsTo="property_management.*" mongodb_dump
-   ```
+المجموع: **0 ريال** شهرياً.
 
 ---
 
-## الخطوة 2: GitHub
+## 📦 الخطوة 1 — رفع المشروع إلى GitHub
 
-1. أنشئ repo جديد في GitHub
-2. ادفع الكود:
-   ```bash
-   git init
-   git add .
-   git commit -m "Initial commit - Property Management System"
-   git branch -M main
-   git remote add origin https://github.com/YOUR_USER/property-management.git
-   git push -u origin main
-   ```
+المشروع يعمل داخل منصة Emergent. لرفعه إلى GitHub:
 
-**ملاحظة**: ملف `.gitignore` مدمج بالمشروع ويستثني `node_modules` و`.env` والملفات الحساسة.
+1. من أسفل نافذة المحادثة، اضغط زر **"Save to GitHub"** 
+2. اربط حساب GitHub (لمرة واحدة فقط)
+3. أنشئ Repo جديد (مثلاً: `property-management`) واختر Public أو Private
+4. المنصة ستدفع الكود تلقائياً 🎉
+
+> ملف `.gitignore` جاهز ويستثني تلقائياً `node_modules`، `.env`، `mongodb_dump/`، إلخ.
 
 ---
 
-## الخطوة 3: Render (التطبيق)
+## 🗄️ الخطوة 2 — إعداد MongoDB Atlas (قاعدة البيانات)
 
-### الطريقة الأسرع (Blueprint):
+1. اذهب إلى **https://cloud.mongodb.com** وأنشئ حساباً مجاناً
+2. اضغط **"Build a Database"** → اختر **M0 Free Cluster** → اضغط Create
+3. من القائمة الجانبية:
+   - **Database Access** → **Add New Database User**
+     - اختر Password Authentication  
+     - أدخل username و password (احفظهما!)
+     - Role: `Atlas admin`
+   - **Network Access** → **Add IP Address**
+     - اضغط **"Allow Access from Anywhere"** → أدخل `0.0.0.0/0` → Confirm
+4. من صفحة **Database** → اضغط **Connect** على Cluster0:
+   - Choose **Drivers** → Python → 3.11 or later
+   - انسخ Connection String — يشبه:
+     ```
+     mongodb+srv://USERNAME:PASSWORD@cluster0.xxxx.mongodb.net/?retryWrites=true&w=majority
+     ```
+   - **⚠️ استبدل `<password>` بكلمة المرور الفعلية.** احفظ هذا النص، ستحتاجه في Render.
 
-1. اذهب إلى https://dashboard.render.com/blueprints
+---
+
+## ☁️ الخطوة 3 — النشر على Render
+
+الطريقة الأسرع تستخدم ملف **`render.yaml`** الموجود جاهزاً في جذر المشروع.
+
+### 3.1 — إنشاء Blueprint
+
+1. اذهب إلى **https://dashboard.render.com/blueprints** وسجّل دخول (يقبل GitHub Login)
 2. اضغط **"New Blueprint Instance"**
-3. اختر GitHub repo الخاص بك
-4. سيقرأ Render ملف `render.yaml` تلقائياً
-5. أدخل المتغيرات المطلوبة:
-   - `MONGO_URL` = connection string من Atlas
-   - `REACT_APP_BACKEND_URL` = URL الباكاند في Render (مثل `https://property-mgmt-backend.onrender.com`)
-6. اضغط **Apply** وانتظر 5-10 دقائق
+3. اختر GitHub Repo الذي رفعته للتوّ
+4. Render سيقرأ `render.yaml` تلقائياً ويعرض:
+   - `property-mgmt-backend` (Web Service)
+   - `property-mgmt-frontend` (Static Site)
 
-### الطريقة اليدوية (لمزيد من التحكم):
+### 3.2 — إدخال المتغيرات المطلوبة
 
-**Backend Service:**
-- Type: **Web Service**
-- Root Directory: `backend`
-- Runtime: `Python 3.11.9`
-- Build Command: `pip install -r requirements.txt`
-- Start Command: `uvicorn server:app --host 0.0.0.0 --port $PORT`
-- Environment Variables:
-  - `MONGO_URL` = connection string من MongoDB Atlas
-  - `DB_NAME` = `property_management`
-  - `JWT_SECRET` = أي نص عشوائي طويل
-  - `PYTHON_VERSION` = `3.11.9`
+سيطلب منك Render إدخال قيم المتغيرات التي عليها `sync: false`:
 
-**Frontend Static Site:**
-- Type: **Static Site**
-- Root Directory: `frontend`
-- Build Command: `yarn install && yarn build`
-- Publish Directory: `build`
-- Environment Variables:
-  - `REACT_APP_BACKEND_URL` = URL الباكاند في Render
-- Rewrite Rule: `/*` → `/index.html` (لدعم React Router)
+| المتغير | القيمة |
+|---|---|
+| `MONGO_URL` | connection string من MongoDB Atlas (من الخطوة 2) |
+| `REACT_APP_BACKEND_URL` | **اترك فارغاً الآن**، ستملؤه في الخطوة 3.3 |
+
+اضغط **Apply** — Render سيبدأ بناء الـ Backend أولاً.
+
+### 3.3 — تحديث `REACT_APP_BACKEND_URL`
+
+1. بعد ما ينتهي بناء الـ Backend (5–10 دقائق أول مرة)، انسخ URL الخاص به من Render:
+   - مثال: `https://property-mgmt-backend.onrender.com`
+2. اذهب إلى Service `property-mgmt-frontend` → **Environment** → عدّل `REACT_APP_BACKEND_URL` بهذا الـ URL
+3. اضغط **Manual Deploy** → **Deploy latest commit**
+
+بعد 3–5 دقائق سيكون التطبيق جاهزاً 🎉
 
 ---
 
-## ملاحظات مهمة
+## 🔑 تسجيل الدخول
 
-1. **خطة Render المجانية** توقف الخدمة بعد 15 دقيقة من الخمول (أول طلب قد يأخذ 30-50ث)
-2. **خطة MongoDB Atlas M0** مجانية دائماً (512MB و 500 connections)
-3. **CORS**: `server.py` يسمح بكل origins (`allow_origins=['*']`) - مناسب للاختبار. للإنتاج اجعله محدداً.
-4. **أول تشغيل**: سيقوم `seed.py` بإنشاء مستخدم admin/admin تلقائياً + بيانات تجريبية.
-5. **HTTPS**: Render يوفر SSL مجانية تلقائياً.
+- **Username:** `admin`
+- **Password:** `admin`
 
----
-
-## تحديث الكود
-
-أي `git push` إلى branch `main` سيؤدي إلى إعادة نشر تلقائي في Render.
+عند أول تشغيل، سيقوم `seed.py` بإنشاء حساب المدير وبيانات تجريبية (ملاك، عقارات، عقود...) تلقائياً.
 
 ---
 
-لأي مشكلة في النشر، تحقق من:
-- `Render Dashboard` → `Logs` (لرؤية أخطاء التشغيل)
-- `MongoDB Atlas` → `Network Access` (تأكد إضافة 0.0.0.0/0)
+## ⚙️ متغيرات البيئة الكاملة (للمرجع)
+
+### Backend
+| المفتاح | مطلوب؟ | مثال |
+|---|---|---|
+| `MONGO_URL` | ✅ | `mongodb+srv://user:pass@cluster.mongodb.net/` |
+| `DB_NAME` | ✅ | `property_management` |
+| `JWT_SECRET` | ✅ (يُنشأ تلقائياً في Render) | نص عشوائي طويل ≥ 32 حرف |
+| `FRONTEND_ORIGIN` | اختياري | `https://your-frontend.onrender.com` (تقييد CORS) |
+
+### Frontend
+| المفتاح | مطلوب؟ | مثال |
+|---|---|---|
+| `REACT_APP_BACKEND_URL` | ✅ | `https://property-mgmt-backend.onrender.com` |
+
+---
+
+## 📝 ملاحظات مهمة
+
+- **الخطة المجانية في Render** توقف الخدمة بعد ~15 دقيقة من الخمول. أول طلب بعد الاستيقاظ قد يأخذ **30–50 ثانية**. الطلبات التالية سريعة.
+- **MongoDB Atlas M0** يعطيك 512MB و 500 اتصال — كافٍ لآلاف السجلات.
+- **SSL/HTTPS** مجاني وتلقائي في Render.
+- **إعادة النشر التلقائي**: أي `git push` إلى `main` سيُعيد النشر تلقائياً.
+- **تقييد CORS**: للأمان، بعد النشر عيّن `FRONTEND_ORIGIN` في Backend لتقتصر الطلبات على نطاق Frontend فقط.
+- **مدير النظام (admin)** محمي: لا يمكن حذفه من الواجهة أو الـ API.
+
+---
+
+## 🐛 حل المشاكل الشائعة
+
+| المشكلة | الحل |
+|---|---|
+| Backend logs: `MongoDB connection failed` | تأكد من إضافة `0.0.0.0/0` في Network Access في Atlas، وأن كلمة السر في `MONGO_URL` لا تحتوي على `@` أو `#` بدون URL-encoding |
+| Frontend يعطي `Network Error` | تحقق أن `REACT_APP_BACKEND_URL` صحيح ولا ينتهي بـ `/`. أعد بناء Frontend بعد تعديله |
+| صفحات لا تُحمّل عند التحديث (404) | تأكد أن `render.yaml` يحوي `type: rewrite, source: /*, destination: /index.html` — موجود جاهز |
+| Cluster ينام بسرعة | استخدم [UptimeRobot](https://uptimerobot.com) لعمل ping كل 10 دقائق مجاناً |
+
+---
+
+## 📞 روابط مفيدة
+
+- Render Docs: https://render.com/docs
+- MongoDB Atlas Docs: https://www.mongodb.com/docs/atlas/
+- render.yaml Spec: https://render.com/docs/blueprint-spec
+
+---
+
+**🎉 مبروك! تطبيقك الآن على الإنترنت مجاناً بالكامل.**

@@ -1,6 +1,6 @@
 import React, { useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Plus, Search, Edit2, Trash2, X, Eye, Info } from 'lucide-react';
+import { Plus, Search, Edit2, Trash2, X, Eye, Info, Shield } from 'lucide-react';
 import { useApp } from '../context/AppContext';
 
 // A reusable CRUD table + add/edit modal for entities.
@@ -13,7 +13,7 @@ import { useApp } from '../context/AppContext';
 // - fields: [{ name, label, type, options?, required?, colSpan?, placeholder? }]
 // - filters?: [{ key, label, options }]
 // - searchKeys: array of keys used for search
-export default function CrudTable({ title, icon: Icon, color = 'blue', data, setData, columns, fields, filters = [], searchKeys = [], resource, extraActions }) {
+export default function CrudTable({ title, icon: Icon, color = 'blue', data, setData, columns, fields, filters = [], searchKeys = [], resource, extraActions, canDelete }) {
   const { t, lang } = useApp();
   const navigate = useNavigate();
   const [search, setSearch] = useState('');
@@ -22,6 +22,7 @@ export default function CrudTable({ title, icon: Icon, color = 'blue', data, set
   const [editing, setEditing] = useState(null);
   const [confirmDelete, setConfirmDelete] = useState(null);
   const [errorMsg, setErrorMsg] = useState('');
+  const [errorType, setErrorType] = useState('delete'); // 'delete' | 'save'
   const [previewRow, setPreviewRow] = useState(null);
 
   const filtered = useMemo(() => {
@@ -41,14 +42,20 @@ export default function CrudTable({ title, icon: Icon, color = 'blue', data, set
   const openAdd = () => { setEditing(null); setModalOpen(true); };
   const openEdit = (row) => { setEditing(row); setModalOpen(true); };
 
-  const handleSave = (formData) => {
-    if (editing) {
-      setData(data.map((r) => (r.id === editing.id ? { ...r, ...formData } : r)));
-    } else {
-      const newId = Math.max(0, ...data.map((r) => Number(r.id) || 0)) + 1;
-      setData([...data, { id: newId, ...formData }]);
+  const handleSave = async (formData) => {
+    try {
+      if (editing) {
+        await setData(data.map((r) => (r.id === editing.id ? { ...r, ...formData } : r)));
+      } else {
+        const newId = Math.max(0, ...data.map((r) => Number(r.id) || 0)) + 1;
+        await setData([...data, { id: newId, ...formData }]);
+      }
+      setModalOpen(false); setEditing(null);
+    } catch (e) {
+      setErrorType('save');
+      setErrorMsg(e?.response?.data?.detail || e.message || 'Save failed');
+      setModalOpen(false); setEditing(null);
     }
-    setModalOpen(false); setEditing(null);
   };
 
   const handleDelete = async () => {
@@ -56,11 +63,10 @@ export default function CrudTable({ title, icon: Icon, color = 'blue', data, set
       const target = confirmDelete;
       setConfirmDelete(null);
       try {
-        // Optimistically remove locally, but if the caller's setData is async and
-        // the server rejects (e.g. 409 has contracts / has properties), we surface the error.
         const filtered = data.filter((r) => r.id !== target.id);
         await setData(filtered);
       } catch (e) {
+        setErrorType('delete');
         setErrorMsg(e?.response?.data?.detail || e.message || 'Delete failed');
       }
     }
@@ -88,13 +94,13 @@ export default function CrudTable({ title, icon: Icon, color = 'blue', data, set
       {errorMsg && (
         <div className="bg-red-50 dark:bg-red-900/30 border border-red-200 dark:border-red-800 rounded-xl px-4 py-3 flex items-start gap-3">
           <div className="w-8 h-8 rounded-lg bg-red-100 dark:bg-red-900/50 flex items-center justify-center flex-shrink-0">
-            <Trash2 size={14} className="text-red-600 dark:text-red-400" />
+            <Info size={14} className="text-red-600 dark:text-red-400" />
           </div>
           <div className="flex-1 text-sm text-red-700 dark:text-red-300">
-            <p className="font-semibold">{t('cannot_delete')}</p>
+            <p className="font-semibold">{errorType === 'save' ? t('operation_failed') : t('cannot_delete')}</p>
             <p className="text-xs mt-0.5">{errorMsg}</p>
           </div>
-          <button onClick={() => setErrorMsg('')} className="text-red-400 hover:text-red-600 dark:hover:text-red-200">
+          <button data-testid="close-error-banner-btn" onClick={() => setErrorMsg('')} className="text-red-400 hover:text-red-600 dark:hover:text-red-200">
             <X size={16} />
           </button>
         </div>
@@ -190,9 +196,15 @@ export default function CrudTable({ title, icon: Icon, color = 'blue', data, set
                       <button onClick={() => openEdit(row)} title={t('edit')} className="p-2 rounded-lg text-blue-600 hover:bg-blue-50 dark:text-blue-400 dark:hover:bg-blue-900/30 transition-colors">
                         <Edit2 size={14} />
                       </button>
-                      <button onClick={() => setConfirmDelete(row)} title={t('delete')} className="p-2 rounded-lg text-red-600 hover:bg-red-50 dark:text-red-400 dark:hover:bg-red-900/30 transition-colors">
-                        <Trash2 size={14} />
-                      </button>
+                      {(!canDelete || canDelete(row)) ? (
+                        <button onClick={() => setConfirmDelete(row)} title={t('delete')} className="p-2 rounded-lg text-red-600 hover:bg-red-50 dark:text-red-400 dark:hover:bg-red-900/30 transition-colors">
+                          <Trash2 size={14} />
+                        </button>
+                      ) : (
+                        <span title={t('protected_record')} className="p-2 rounded-lg text-gray-300 dark:text-gray-600 cursor-not-allowed">
+                          <Shield size={14} />
+                        </span>
+                      )}
                     </div>
                   </td>
                 </tr>
@@ -259,7 +271,6 @@ function FormModal({ title, fields, initial, onClose, onSave, colorGrad }) {
 
   const submit = (e) => {
     e.preventDefault();
-    // basic normalization for numbers
     const cleaned = { ...values };
     fields.forEach((f) => {
       if (f.type === 'number' && cleaned[f.name] !== '' && cleaned[f.name] != null) {
@@ -269,55 +280,84 @@ function FormModal({ title, fields, initial, onClose, onSave, colorGrad }) {
     onSave(cleaned);
   };
 
+  // Group fields into sections when a 'section' key is provided
+  const hasSections = fields.some((f) => f.section);
+  const sections = hasSections
+    ? fields.reduce((acc, f) => {
+        const s = f.section || 'default';
+        if (!acc[s]) acc[s] = [];
+        acc[s].push(f);
+        return acc;
+      }, {})
+    : { default: fields };
+  const sectionOrder = Object.keys(sections);
+
+  const renderField = (f) => (
+    <div key={f.name} className={f.colSpan === 2 ? 'md:col-span-2' : ''}>
+      <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">
+        {f.label}{f.required && <span className="text-red-500 ms-1">*</span>}
+      </label>
+      {f.type === 'select' ? (
+        <select
+          value={values[f.name] ?? ''}
+          onChange={(e) => setV(f.name, e.target.value)}
+          required={f.required}
+          className="w-full px-4 py-2.5 text-sm bg-gray-50 dark:bg-gray-700/50 border border-gray-200 dark:border-gray-600 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500/30 focus:border-blue-500 dark:text-gray-100"
+        >
+          <option value="">--</option>
+          {f.options.map((o) => <option key={o.value} value={o.value}>{o.label}</option>)}
+        </select>
+      ) : f.type === 'textarea' ? (
+        <textarea
+          value={values[f.name] ?? ''}
+          onChange={(e) => setV(f.name, e.target.value)}
+          rows={3}
+          placeholder={f.placeholder}
+          className="w-full px-4 py-2.5 text-sm bg-gray-50 dark:bg-gray-700/50 border border-gray-200 dark:border-gray-600 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500/30 focus:border-blue-500 dark:text-gray-100"
+        />
+      ) : (
+        <input
+          type={f.type || 'text'}
+          value={values[f.name] ?? ''}
+          onChange={(e) => setV(f.name, e.target.value)}
+          required={f.required}
+          placeholder={f.placeholder}
+          step={f.type === 'number' ? 'any' : undefined}
+          className="w-full px-4 py-2.5 text-sm bg-gray-50 dark:bg-gray-700/50 border border-gray-200 dark:border-gray-600 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500/30 focus:border-blue-500 dark:text-gray-100"
+        />
+      )}
+      {f.hint && <p className="mt-1 text-[11px] text-gray-400">{f.hint}</p>}
+    </div>
+  );
+
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-gray-900/60 backdrop-blur-sm overflow-y-auto">
-      <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl max-w-2xl w-full my-8">
+      <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl max-w-3xl w-full my-8">
         <div className={`bg-gradient-to-r ${colorGrad} px-6 py-4 rounded-t-2xl flex items-center justify-between`}>
           <h3 className="text-white text-lg font-bold">{title}</h3>
           <button onClick={onClose} className="text-white/80 hover:text-white p-1 rounded-lg hover:bg-white/10 transition-colors">
             <X size={20} />
           </button>
         </div>
-        <form onSubmit={submit} className="p-6">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {fields.map((f) => (
-              <div key={f.name} className={f.colSpan === 2 ? 'md:col-span-2' : ''}>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">
-                  {f.label}{f.required && <span className="text-red-500 ms-1">*</span>}
-                </label>
-                {f.type === 'select' ? (
-                  <select
-                    value={values[f.name] ?? ''}
-                    onChange={(e) => setV(f.name, e.target.value)}
-                    required={f.required}
-                    className="w-full px-4 py-2.5 text-sm bg-gray-50 dark:bg-gray-700/50 border border-gray-200 dark:border-gray-600 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500/30 focus:border-blue-500 dark:text-gray-100"
-                  >
-                    <option value="">--</option>
-                    {f.options.map((o) => <option key={o.value} value={o.value}>{o.label}</option>)}
-                  </select>
-                ) : f.type === 'textarea' ? (
-                  <textarea
-                    value={values[f.name] ?? ''}
-                    onChange={(e) => setV(f.name, e.target.value)}
-                    rows={3}
-                    placeholder={f.placeholder}
-                    className="w-full px-4 py-2.5 text-sm bg-gray-50 dark:bg-gray-700/50 border border-gray-200 dark:border-gray-600 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500/30 focus:border-blue-500 dark:text-gray-100"
-                  />
-                ) : (
-                  <input
-                    type={f.type || 'text'}
-                    value={values[f.name] ?? ''}
-                    onChange={(e) => setV(f.name, e.target.value)}
-                    required={f.required}
-                    placeholder={f.placeholder}
-                    step={f.type === 'number' ? 'any' : undefined}
-                    className="w-full px-4 py-2.5 text-sm bg-gray-50 dark:bg-gray-700/50 border border-gray-200 dark:border-gray-600 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500/30 focus:border-blue-500 dark:text-gray-100"
-                  />
-                )}
+        <form onSubmit={submit} className="p-6 max-h-[70vh] overflow-y-auto">
+          {hasSections ? (
+            sectionOrder.map((secName) => (
+              <div key={secName} className="mb-6 last:mb-0">
+                <div className="flex items-center gap-2 mb-3 pb-2 border-b border-gray-100 dark:border-gray-700">
+                  <div className={`w-1 h-5 rounded-full bg-gradient-to-b ${colorGrad}`}></div>
+                  <h4 className="text-sm font-bold text-gray-900 dark:text-white">{secName}</h4>
+                </div>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  {sections[secName].map(renderField)}
+                </div>
               </div>
-            ))}
-          </div>
-          <div className="flex gap-3 mt-6 pt-4 border-t border-gray-100 dark:border-gray-700">
+            ))
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {fields.map(renderField)}
+            </div>
+          )}
+          <div className="flex gap-3 mt-6 pt-4 border-t border-gray-100 dark:border-gray-700 sticky bottom-0 bg-white dark:bg-gray-800">
             <button type="button" onClick={onClose} className="flex-1 py-2.5 rounded-xl border border-gray-200 dark:border-gray-600 text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">{t('cancel')}</button>
             <button type="submit" className={`flex-1 py-2.5 rounded-xl bg-gradient-to-r ${colorGrad} text-white text-sm font-semibold shadow-md hover:shadow-lg transition-all`}>{t('save')}</button>
           </div>

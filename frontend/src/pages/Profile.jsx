@@ -3,10 +3,42 @@ import { useParams, useNavigate, Link } from 'react-router-dom';
 import {
   ArrowLeft, ArrowRight, Edit2, Building2, DoorOpen, Users, FileText, Wallet,
   Receipt, Wrench, UserCog, UsersRound, Zap, Phone, Mail, MapPin, Calendar,
-  DollarSign, Hash, CreditCard, Building, Shield, Info, ChevronLeft, ChevronRight
+  DollarSign, Hash, CreditCard, Building, Shield, Info, ChevronLeft, ChevronRight,
+  FileDown, FileSpreadsheet
 } from 'lucide-react';
 import { useApp } from '../context/AppContext';
 import { useCollection } from '../hooks/useCollection';
+import { printReport, buildTable, exportToExcel } from '../lib/export';
+
+// Format a number like 1,234.50
+const fmt = (n) => (n == null ? '0' : Number(n).toLocaleString('en-US', { minimumFractionDigits: 0, maximumFractionDigits: 2 }));
+
+// Compute totals for exportable sections (payments / utility_bills).
+// Returns null if the section isn't summable.
+function computeSectionTotals(sec, t, isRTL) {
+  const sar = isRTL ? 'ر.س' : 'SAR';
+  if (sec.resource === 'payments') {
+    const total = sec.rows.reduce((s, r) => s + (Number(r.amount) || 0), 0);
+    const paid = sec.rows.filter((r) => r.status === 'paid').reduce((s, r) => s + (Number(r.amount) || 0), 0);
+    const remaining = Math.max(0, total - paid);
+    return {
+      total: `${fmt(total)} ${sar}`,
+      paid: `${fmt(paid)} ${sar}`,
+      remaining: `${fmt(remaining)} ${sar}`,
+    };
+  }
+  if (sec.resource === 'utility_bills' || sec.resource === 'expenses') {
+    const total = sec.rows.reduce((s, r) => s + (Number(r.amount) || 0), 0);
+    const paid = sec.rows.filter((r) => r.status === 'paid').reduce((s, r) => s + (Number(r.amount) || 0), 0);
+    const remaining = Math.max(0, total - paid);
+    return {
+      total: `${fmt(total)} ${sar}`,
+      paid: `${fmt(paid)} ${sar}`,
+      remaining: `${fmt(remaining)} ${sar}`,
+    };
+  }
+  return null;
+}
 
 // Configuration for each resource type
 const RESOURCE_CONFIG = {
@@ -103,6 +135,86 @@ export default function Profile() {
     owners, properties, units, tenants, contracts, payments, expenses, utilityBills, maintenance, t, lang,
   });
 
+  const exportSectionPDF = (sec) => {
+    const title = `${sec.title} — ${displayName}`;
+    const subtitle = `${t(cfg.titleKey)}: ${displayName}  •  ${new Date().toLocaleDateString(isRTL ? 'ar-SA' : 'en-US', { day: 'numeric', month: 'long', year: 'numeric' })}`;
+    // Convert render functions to plain string values for the printable table
+    const cols = sec.columns.map((c) => ({ key: c.key, label: c.label, value: c.render ? (r) => c.render(r) : undefined }));
+    const table = buildTable(cols, sec.rows);
+    const totals = computeSectionTotals(sec, t, isRTL);
+    const totalsHtml = totals ? `<div class="stamp"><div><div class="label">${t('total')}</div><div class="value">${totals.total}</div></div><div><div class="label">${t('paid')}</div><div class="value" style="color:#a7f3d0">${totals.paid}</div></div><div><div class="label">${t('remaining')}</div><div class="value" style="color:#fecaca">${totals.remaining}</div></div></div>` : '';
+    const body = `<h1>${title}</h1><p class="subtitle">${subtitle} • ${sec.rows.length} ${isRTL ? 'سجل' : 'records'}</p>${totalsHtml}${table}`;
+    printReport(title, body, { dir: isRTL ? 'rtl' : 'ltr', lang });
+  };
+
+  const exportSectionExcel = (sec) => {
+    const date = new Date().toISOString().slice(0, 10);
+    const filename = `${sec.title.replace(/\s+/g, '_')}_${displayName.replace(/\s+/g, '_')}_${date}.xlsx`;
+    const cols = sec.columns.map((c) => ({ key: c.key, label: c.label, value: c.render ? (r) => c.render(r) : undefined }));
+    const totals = computeSectionTotals(sec, t, isRTL);
+    exportToExcel(filename, sec.rows, cols, sec.title.slice(0, 28), {
+      title: `${sec.title} — ${displayName}`,
+      subtitle: `${t(cfg.titleKey)}: ${displayName}  •  ${new Date().toLocaleDateString(isRTL ? 'ar-SA' : 'en-US', { day: 'numeric', month: 'long', year: 'numeric' })}  •  ${sec.rows.length} ${isRTL ? 'سجل' : 'records'}`,
+      totals: totals ? [
+        { label: t('total'), value: totals.total },
+        { label: t('paid'), value: totals.paid },
+        { label: t('remaining'), value: totals.remaining },
+      ] : undefined,
+    });
+  };
+
+  // Full profile PDF: entity details + every related sub-section in ONE printable document
+  const exportFullProfilePDF = () => {
+    const kindLabel = t(cfg.titleKey);
+    const title = `${isRTL ? 'كشف حساب' : 'Full statement'} — ${displayName}`;
+    const today = new Date().toLocaleDateString(isRTL ? 'ar-SA' : 'en-US', { day: 'numeric', month: 'long', year: 'numeric' });
+
+    // Header + identity block
+    const identity = `
+      <div class="stamp">
+        <div><div class="label">${kindLabel}</div><div class="value">${displayName}</div></div>
+        <div><div class="label">${isRTL ? 'التاريخ' : 'Date'}</div><div class="value" style="font-size:14px">${today}</div></div>
+      </div>
+    `;
+
+    // Details grid
+    const detailsHtml = `
+      <h2 style="font-size:15px; margin: 18px 0 8px; padding: 6px 10px; background:#f1f5f9; border-radius: 8px;">${isRTL ? 'البيانات الأساسية' : 'Basic Information'}</h2>
+      <table style="border:none;">
+        <tbody>
+          ${fields.reduce((acc, f, i) => {
+            const cell = `<td style="border:1px solid #e5e7eb; padding:8px 12px; background:#f9fafb; width:25%;"><b>${f.label}</b></td><td style="border:1px solid #e5e7eb; padding:8px 12px; width:25%;">${f.value == null ? '-' : String(f.value)}</td>`;
+            if (i % 2 === 0) return acc + `<tr>${cell}`;
+            return acc + `${cell}</tr>`;
+          }, '')}
+          ${fields.length % 2 === 1 ? '<td colspan="2" style="border:1px solid #e5e7eb;"></td></tr>' : ''}
+        </tbody>
+      </table>
+    `;
+
+    // Every related section with its own totals block
+    const sectionsHtml = related.map((sec) => {
+      if (sec.rows.length === 0) return '';
+      const cols = sec.columns.map((c) => ({ key: c.key, label: c.label, value: c.render ? (r) => c.render(r) : undefined }));
+      const table = buildTable(cols, sec.rows);
+      const totals = computeSectionTotals(sec, t, isRTL);
+      const totalsHtml = totals
+        ? `<div class="stamp" style="margin-top:10px; background: linear-gradient(135deg,#059669 0%,#0891b2 100%);"><div><div class="label">${t('total')}</div><div class="value">${totals.total}</div></div><div><div class="label">${t('paid')}</div><div class="value">${totals.paid}</div></div><div><div class="label">${t('remaining')}</div><div class="value">${totals.remaining}</div></div></div>`
+        : '';
+      return `
+        <div style="page-break-inside: avoid; margin-top: 22px;">
+          <h2 style="font-size:15px; margin: 0 0 8px; padding: 6px 10px; background:#eef2ff; border-radius: 8px;">
+            ${sec.title} <span style="font-weight:400; color:#6b7280; font-size:12px;">(${sec.rows.length})</span>
+          </h2>
+          ${table}
+          ${totalsHtml}
+        </div>
+      `;
+    }).join('');
+
+    printReport(title, identity + detailsHtml + sectionsHtml, { dir: isRTL ? 'rtl' : 'ltr', lang });
+  };
+
   return (
     <div className="space-y-6">
       {/* Header banner */}
@@ -127,7 +239,16 @@ export default function Profile() {
               {subtitle && <p className="text-white/80 text-sm mt-0.5 truncate">{subtitle}</p>}
             </div>
           </div>
-          <div className="flex items-center gap-2 flex-shrink-0">
+          <div className="flex items-center gap-2 flex-shrink-0 flex-wrap">
+            <button
+              data-testid="print-full-profile-btn"
+              onClick={exportFullProfilePDF}
+              className="flex items-center gap-2 px-4 py-2.5 bg-white/15 hover:bg-white/25 backdrop-blur-sm text-white rounded-xl font-semibold text-sm transition-all"
+              title={isRTL ? 'طباعة كامل الملف' : 'Print full statement'}
+            >
+              <FileDown size={14} />
+              {isRTL ? 'كشف حساب شامل' : 'Full statement'}
+            </button>
             <Link to={cfg.backTo} className="px-4 py-2.5 bg-white/15 hover:bg-white/25 backdrop-blur-sm text-white rounded-xl font-semibold text-sm transition-all">
               {t('cancel')}
             </Link>
@@ -160,17 +281,41 @@ export default function Profile() {
       {/* Related sections */}
       {related.map((sec, si) => (
         <div key={si} className="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 overflow-hidden">
-          <div className="px-6 py-4 border-b border-gray-100 dark:border-gray-700 flex items-center justify-between">
+          <div className="px-6 py-4 border-b border-gray-100 dark:border-gray-700 flex items-center justify-between gap-3 flex-wrap">
             <h3 className="text-sm font-bold text-gray-900 dark:text-white flex items-center gap-2">
               {sec.icon && <sec.icon size={14} className={`text-${sec.tone || 'gray'}-600`} />}
               {sec.title}
               <span className="text-xs font-medium text-gray-400 bg-gray-100 dark:bg-gray-700 px-2 py-0.5 rounded-full">{sec.rows.length}</span>
             </h3>
-            {sec.linkTo && (
-              <Link to={sec.linkTo} className="text-xs font-semibold text-blue-600 dark:text-blue-400 hover:text-blue-800">
-                {t('view_all')} {isRTL ? <ChevronLeft size={11} className="inline" /> : <ChevronRight size={11} className="inline" />}
-              </Link>
-            )}
+            <div className="flex items-center gap-2">
+              {sec.rows.length > 0 && (
+                <>
+                  <button
+                    data-testid={`export-pdf-${sec.resource}-btn`}
+                    onClick={() => exportSectionPDF(sec)}
+                    className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-red-700 bg-red-50 hover:bg-red-100 dark:text-red-300 dark:bg-red-900/30 dark:hover:bg-red-900/50 rounded-lg transition-colors"
+                    title={t('export_pdf') || 'PDF'}
+                  >
+                    <FileDown size={13} />
+                    PDF
+                  </button>
+                  <button
+                    data-testid={`export-excel-${sec.resource}-btn`}
+                    onClick={() => exportSectionExcel(sec)}
+                    className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-emerald-700 bg-emerald-50 hover:bg-emerald-100 dark:text-emerald-300 dark:bg-emerald-900/30 dark:hover:bg-emerald-900/50 rounded-lg transition-colors"
+                    title="Excel"
+                  >
+                    <FileSpreadsheet size={13} />
+                    Excel
+                  </button>
+                </>
+              )}
+              {sec.linkTo && (
+                <Link to={sec.linkTo} className="text-xs font-semibold text-blue-600 dark:text-blue-400 hover:text-blue-800">
+                  {t('view_all')} {isRTL ? <ChevronLeft size={11} className="inline" /> : <ChevronRight size={11} className="inline" />}
+                </Link>
+              )}
+            </div>
           </div>
           <div className="overflow-x-auto">
             {sec.rows.length === 0 ? (
@@ -182,6 +327,9 @@ export default function Profile() {
                     {sec.columns.map((c) => (
                       <th key={c.key} className="text-start px-6 py-3 text-[11px] font-bold text-gray-500 uppercase tracking-wider whitespace-nowrap">{c.label}</th>
                     ))}
+                    {sec.resource && (
+                      <th className="text-end px-6 py-3 text-[11px] font-bold text-gray-500 uppercase tracking-wider whitespace-nowrap">{t('actions')}</th>
+                    )}
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-gray-50 dark:divide-gray-700/50">
@@ -192,6 +340,17 @@ export default function Profile() {
                           {c.render ? c.render(row) : (row[c.key] == null ? '-' : String(row[c.key]))}
                         </td>
                       ))}
+                      {sec.resource && (
+                        <td className="px-6 py-3 text-end whitespace-nowrap">
+                          <Link
+                            to={`/profile/${sec.resource}/${row.id}`}
+                            className="inline-flex items-center gap-1.5 text-xs font-semibold text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300"
+                          >
+                            {t('view')}
+                            {isRTL ? <ChevronLeft size={11} /> : <ChevronRight size={11} />}
+                          </Link>
+                        </td>
+                      )}
                     </tr>
                   ))}
                 </tbody>
@@ -358,7 +517,7 @@ function buildRelatedSections(resource, item, ctx) {
   if (resource === 'owners') {
     const ownerProps = properties.filter((p) => p.owner_id === item.id);
     list.push({
-      title: t('properties'), icon: Building2, tone: 'blue',
+      title: t('properties'), icon: Building2, tone: 'blue', resource: 'properties',
       columns: [
         { key: 'name', label: t('property_name') },
         { key: 'type', label: t('type'), render: (r) => t('property_type_' + r.type) },
@@ -372,7 +531,7 @@ function buildRelatedSections(resource, item, ctx) {
   if (resource === 'properties') {
     const propUnits = units.filter((u) => u.property_id === item.id);
     list.push({
-      title: t('units'), icon: DoorOpen, tone: 'cyan',
+      title: t('units'), icon: DoorOpen, tone: 'cyan', resource: 'units',
       columns: [
         { key: 'unit_number', label: t('unit_number') },
         { key: 'floor', label: t('floor') },
@@ -384,7 +543,7 @@ function buildRelatedSections(resource, item, ctx) {
     });
     const propExpenses = expenses.filter((e) => e.property_id === item.id);
     list.push({
-      title: t('expenses'), icon: Receipt, tone: 'red',
+      title: t('expenses'), icon: Receipt, tone: 'red', resource: 'expenses',
       columns: [
         { key: 'description', label: t('description') },
         { key: 'category', label: t('category'), render: (r) => t(r.category) },
@@ -398,7 +557,7 @@ function buildRelatedSections(resource, item, ctx) {
   if (resource === 'units') {
     const unitContracts = contracts.filter((c) => c.unit_id === item.id);
     list.push({
-      title: t('contracts'), icon: FileText, tone: 'amber',
+      title: t('contracts'), icon: FileText, tone: 'amber', resource: 'contracts',
       columns: [
         { key: 'contract_number', label: t('contract_number') },
         { key: 'tenant_id', label: t('tenant'), render: (r) => tenants.find((x) => x.id === r.tenant_id)?.name || '-' },
@@ -410,7 +569,7 @@ function buildRelatedSections(resource, item, ctx) {
     });
     const unitBills = utilityBills.filter((b) => b.unit_id === item.id);
     list.push({
-      title: t('utility_bills'), icon: Zap, tone: 'amber',
+      title: t('utility_bills'), icon: Zap, tone: 'amber', resource: 'utility_bills',
       columns: [
         { key: 'bill_number', label: t('bill_number') },
         { key: 'bill_type', label: t('bill_type'), render: (r) => t(r.bill_type === 'electricity' ? 'electricity_bill' : 'water_bill') },
@@ -425,7 +584,7 @@ function buildRelatedSections(resource, item, ctx) {
   if (resource === 'tenants') {
     const tenantContracts = contracts.filter((c) => c.tenant_id === item.id);
     list.push({
-      title: t('contracts'), icon: FileText, tone: 'amber',
+      title: t('contracts'), icon: FileText, tone: 'amber', resource: 'contracts',
       columns: [
         { key: 'contract_number', label: t('contract_number') },
         { key: 'unit_id', label: t('unit'), render: (r) => units.find((u) => u.id === r.unit_id)?.unit_number || '-' },
@@ -438,7 +597,7 @@ function buildRelatedSections(resource, item, ctx) {
     });
     const tenantPayments = payments.filter((p) => p.tenant_id === item.id);
     list.push({
-      title: t('payments'), icon: Wallet, tone: 'green',
+      title: t('payments'), icon: Wallet, tone: 'green', resource: 'payments',
       columns: [
         { key: 'reference_number', label: t('reference_number') },
         { key: 'amount', label: t('amount'), render: (r) => fmtNum(r.amount) },
@@ -450,7 +609,7 @@ function buildRelatedSections(resource, item, ctx) {
     });
     const tenantBills = utilityBills.filter((b) => b.tenant_id === item.id);
     list.push({
-      title: t('utility_bills'), icon: Zap, tone: 'amber',
+      title: t('utility_bills'), icon: Zap, tone: 'amber', resource: 'utility_bills',
       columns: [
         { key: 'bill_number', label: t('bill_number') },
         { key: 'bill_type', label: t('bill_type'), render: (r) => t(r.bill_type === 'electricity' ? 'electricity_bill' : 'water_bill') },
@@ -464,7 +623,7 @@ function buildRelatedSections(resource, item, ctx) {
   if (resource === 'contracts') {
     const contractPayments = payments.filter((p) => p.contract_id === item.id);
     list.push({
-      title: t('payments'), icon: Wallet, tone: 'green',
+      title: t('payments'), icon: Wallet, tone: 'green', resource: 'payments',
       columns: [
         { key: 'reference_number', label: t('reference_number') },
         { key: 'amount', label: t('amount'), render: (r) => fmtNum(r.amount) },
@@ -481,7 +640,7 @@ function buildRelatedSections(resource, item, ctx) {
     const mnt = maintenance.filter((m) => m.property_id === propId && (resource === 'properties' || m.unit_id === item.id));
     if (mnt.length > 0) {
       list.push({
-        title: t('maintenance'), icon: Wrench, tone: 'orange',
+        title: t('maintenance'), icon: Wrench, tone: 'orange', resource: 'maintenance',
         columns: [
           { key: 'title', label: t('title') },
           { key: 'priority', label: t('priority'), render: (r) => t(r.priority) },

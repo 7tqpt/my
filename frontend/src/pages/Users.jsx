@@ -46,6 +46,7 @@ export default function Users() {
       fields={fields}
       searchKeys={['name', 'username', 'email']}
       filters={[{ key: 'role', label: t('role'), options: [{ value: 'admin', label: t('admin') }, { value: 'user', label: t('user') }] }]}
+      canDelete={(row) => row.username !== 'admin'}
     />
   );
 }

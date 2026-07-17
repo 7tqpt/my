@@ -7,8 +7,8 @@ export default function Login() {
   const { login, t, lang, toggleLang } = useApp();
   const navigate = useNavigate();
   const isRTL = lang === 'ar';
-  const [username, setUsername] = useState('admin');
-  const [password, setPassword] = useState('admin');
+  const [username, setUsername] = useState('');
+  const [password, setPassword] = useState('');
   const [remember, setRemember] = useState(true);
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState('');
@@ -24,15 +24,24 @@ export default function Login() {
     else setError(res.error || (isRTL ? 'بيانات غير صحيحة' : 'Invalid credentials'));
   };
 
-  const Feature = ({ icon: Icon, color, title, desc }) => (
-    <div className="feature-card rounded-2xl p-5">
-      <div className={`w-10 h-10 rounded-xl bg-${color}-500/20 flex items-center justify-center mb-3`}>
-        <Icon className={`text-${color}-400`} size={16} />
+  const Feature = ({ icon: Icon, color, title, desc }) => {
+    const colorMap = {
+      blue: { bg: 'bg-blue-500/20', text: 'text-blue-400' },
+      emerald: { bg: 'bg-emerald-500/20', text: 'text-emerald-400' },
+      amber: { bg: 'bg-amber-500/20', text: 'text-amber-400' },
+      purple: { bg: 'bg-purple-500/20', text: 'text-purple-400' },
+    };
+    const c = colorMap[color] || colorMap.blue;
+    return (
+      <div className="feature-card rounded-2xl p-5">
+        <div className={`w-11 h-11 rounded-xl ${c.bg} flex items-center justify-center mb-3`}>
+          <Icon className={c.text} size={22} strokeWidth={2} />
+        </div>
+        <h3 className="text-sm font-semibold text-white mb-1">{title}</h3>
+        <p className="text-xs text-slate-400">{desc}</p>
       </div>
-      <h3 className="text-sm font-semibold text-white mb-1">{title}</h3>
-      <p className="text-xs text-slate-400">{desc}</p>
-    </div>
-  );
+    );
+  };
 
   return (
     <div className="min-h-screen auth-bg">
@@ -150,8 +159,8 @@ export default function Login() {
         {/* Right: Form */}
         <div className="w-full lg:w-[45%] flex items-center justify-center p-6 sm:p-8 relative z-10">
           <div className={`absolute top-6 ${isRTL ? 'left-6' : 'right-6'}`}>
-            <button onClick={toggleLang} className="inline-flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium text-slate-400 hover:text-white border border-white/10 hover:border-white/25 rounded-lg transition-colors">
-              <Globe size={12} />
+            <button data-testid="toggle-language-btn" onClick={toggleLang} className="inline-flex items-center gap-2 px-3 py-1.5 text-sm font-medium text-slate-400 hover:text-white border border-white/10 hover:border-white/25 rounded-lg transition-colors">
+              <Globe size={14} strokeWidth={2} />
               {isRTL ? 'EN' : 'عربي'}
             </button>
           </div>
@@ -185,12 +194,13 @@ export default function Login() {
                 <div className="animate-in animate-in-delay-2">
                   <label className="block text-sm font-medium text-slate-300 mb-2.5">{t('username')}</label>
                   <div className="relative">
-                    <div className={`absolute inset-y-0 ${isRTL ? 'right-0 pr-4' : 'left-0 pl-4'} flex items-center pointer-events-none`}>
-                      <div className="w-8 h-8 rounded-lg bg-white/5 flex items-center justify-center">
-                        <User className="text-slate-500" size={13} />
+                    <div className={`absolute inset-y-0 ${isRTL ? 'right-0 pr-3' : 'left-0 pl-3'} flex items-center pointer-events-none`}>
+                      <div className="w-9 h-9 rounded-lg bg-blue-500/15 flex items-center justify-center">
+                        <User className="text-blue-300" size={18} strokeWidth={2} />
                       </div>
                     </div>
                     <input
+                      data-testid="login-username-input"
                       type="text"
                       value={username}
                       onChange={(e) => setUsername(e.target.value)}
@@ -205,12 +215,13 @@ export default function Login() {
                 <div className="animate-in animate-in-delay-3">
                   <label className="block text-sm font-medium text-slate-300 mb-2.5">{t('password')}</label>
                   <div className="relative">
-                    <div className={`absolute inset-y-0 ${isRTL ? 'right-0 pr-4' : 'left-0 pl-4'} flex items-center pointer-events-none`}>
-                      <div className="w-8 h-8 rounded-lg bg-white/5 flex items-center justify-center">
-                        <Lock className="text-slate-500" size={13} />
+                    <div className={`absolute inset-y-0 ${isRTL ? 'right-0 pr-3' : 'left-0 pl-3'} flex items-center pointer-events-none`}>
+                      <div className="w-9 h-9 rounded-lg bg-indigo-500/15 flex items-center justify-center">
+                        <Lock className="text-indigo-300" size={18} strokeWidth={2} />
                       </div>
                     </div>
                     <input
+                      data-testid="login-password-input"
                       type={showPassword ? 'text' : 'password'}
                       value={password}
                       onChange={(e) => setPassword(e.target.value)}
@@ -218,9 +229,9 @@ export default function Login() {
                       placeholder="••••••••"
                       className={`input-focus w-full ${isRTL ? 'pl-14 pr-14' : 'pl-14 pr-14'} py-3.5 bg-white/[0.04] border border-white/[0.08] rounded-xl text-white placeholder-slate-500 focus:outline-none text-sm`}
                     />
-                    <button type="button" onClick={() => setShowPassword(!showPassword)} className={`absolute ${isRTL ? 'left-0 pl-4' : 'right-0 pr-4'} inset-y-0 flex items-center`}>
-                      <div className="w-8 h-8 rounded-lg bg-white/5 flex items-center justify-center hover:bg-white/10 transition-colors">
-                        {showPassword ? <EyeOff className="text-slate-500" size={13} /> : <Eye className="text-slate-500" size={13} />}
+                    <button data-testid="toggle-password-visibility-btn" type="button" onClick={() => setShowPassword(!showPassword)} className={`absolute ${isRTL ? 'left-0 pl-3' : 'right-0 pr-3'} inset-y-0 flex items-center`}>
+                      <div className="w-9 h-9 rounded-lg bg-white/5 flex items-center justify-center hover:bg-white/10 transition-colors">
+                        {showPassword ? <EyeOff className="text-slate-300" size={18} strokeWidth={2} /> : <Eye className="text-slate-300" size={18} strokeWidth={2} />}
                       </div>
                     </button>
                   </div>
@@ -254,9 +265,6 @@ export default function Login() {
             <div className="mt-8 text-center animate-in animate-in-delay-3">
               <p className="text-xs text-slate-500">
                 &copy; {new Date().getFullYear()} {t('app_name')}. {t('all_rights_reserved')}
-              </p>
-              <p className="text-[11px] text-slate-600 mt-2">
-                {isRTL ? 'تجريبي: admin / admin' : 'Demo: admin / admin'}
               </p>
             </div>
           </div>

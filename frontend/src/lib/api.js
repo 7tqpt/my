@@ -43,3 +43,9 @@ export const authMe = () => api.get('/auth/me').then((r) => r.data);
 export const getDashboard = () => api.get('/dashboard/summary').then((r) => r.data);
 export const getSettings = () => api.get('/settings').then((r) => r.data);
 export const updateSettings = (data) => api.put('/settings', data).then((r) => r.data);
+
+export const generateMonthlyPayments = (year_month) =>
+  api.post('/payments/generate-monthly', { year_month }).then((r) => r.data);
+
+export const markOverduePayments = (opts = {}) =>
+  api.post('/payments/mark-overdue', opts).then((r) => r.data);

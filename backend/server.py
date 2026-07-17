@@ -1,4 +1,4 @@
-from fastapi import FastAPI
+from fastapi import FastAPI, HTTPException
 from fastapi.responses import FileResponse
 from dotenv import load_dotenv
 from starlette.middleware.cors import CORSMiddleware
@@ -15,24 +15,26 @@ from seed import seed_all
 
 app = FastAPI(title='Property Management API')
 
-# Static download endpoint for the full source-code + DB dump package
+# Downloadable source-code package (available only in preview environment)
 DOWNLOAD_ZIP = '/app/download/property_management_system.zip'
 
 
 @app.get('/api/download-project')
 async def download_project():
     if not os.path.exists(DOWNLOAD_ZIP):
-        from fastapi import HTTPException
         raise HTTPException(404, 'Package not found')
     return FileResponse(DOWNLOAD_ZIP, media_type='application/zip', filename='property_management_system.zip')
 
 
 app.include_router(api_router)
 
+# CORS — tighten in production by setting FRONTEND_ORIGIN
+frontend_origin = os.environ.get('FRONTEND_ORIGIN')
+allow_origins = [frontend_origin] if frontend_origin else ['*']
 app.add_middleware(
     CORSMiddleware,
     allow_credentials=True,
-    allow_origins=['*'],
+    allow_origins=allow_origins,
     allow_methods=['*'],
     allow_headers=['*'],
 )

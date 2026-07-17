@@ -50,7 +50,17 @@ export const AppProvider = ({ children }) => {
     }
   };
 
-  const logout = () => {
+  const logout = async () => {
+    try {
+      const token = localStorage.getItem('pm_token');
+      if (token) {
+        // Best-effort logout on the server to invalidate the session
+        await fetch(`${process.env.REACT_APP_BACKEND_URL}/api/auth/logout`, {
+          method: 'POST',
+          headers: { Authorization: `Bearer ${token}` },
+        });
+      }
+    } catch (e) { /* ignore */ }
     setUser(null);
     localStorage.removeItem('pm_user');
     localStorage.removeItem('pm_token');
