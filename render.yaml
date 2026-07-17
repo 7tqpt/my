@@ -1,0 +1,44 @@
+# render.yaml - Blueprint for deploying to Render.com
+# Docs: https://render.com/docs/blueprint-spec
+#
+# Usage:
+# 1) Push this repo to GitHub
+# 2) Go to https://dashboard.render.com/blueprints and click "New Blueprint Instance"
+# 3) Connect your GitHub repo
+# 4) Set the environment variables (MONGO_URL, JWT_SECRET, REACT_APP_BACKEND_URL)
+# 5) Deploy!
+
+services:
+  # Backend - FastAPI + Uvicorn
+  - type: web
+    name: property-mgmt-backend
+    runtime: python
+    plan: free
+    rootDir: backend
+    buildCommand: pip install -r requirements.txt
+    startCommand: uvicorn server:app --host 0.0.0.0 --port $PORT
+    healthCheckPath: /api/
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.11.9
+      - key: MONGO_URL
+        sync: false          # Set via Render dashboard - use your MongoDB Atlas connection string
+      - key: DB_NAME
+        value: property_management
+      - key: JWT_SECRET
+        generateValue: true  # Render will auto-generate a strong secret
+
+  # Frontend - React static site
+  - type: web
+    name: property-mgmt-frontend
+    runtime: static
+    rootDir: frontend
+    buildCommand: yarn install && yarn build
+    staticPublishPath: ./build
+    envVars:
+      - key: REACT_APP_BACKEND_URL
+        sync: false          # Set to your backend URL, e.g. https://property-mgmt-backend.onrender.com
+    routes:
+      - type: rewrite
+        source: /*
+        destination: /index.html

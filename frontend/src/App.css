@@ -1,0 +1,47 @@
+.App {
+  min-height: 100vh;
+}
+
+/* Font family */
+body {
+  font-family: 'Tajawal', 'Cairo', 'Inter', system-ui, -apple-system, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* RTL/LTR helpers */
+[dir="rtl"] .rtl-flip {
+  transform: scaleX(-1);
+}
+
+/* Nicer scrollbar */
+::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: rgba(156, 163, 175, 0.4);
+  border-radius: 6px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(107, 114, 128, 0.6);
+}
+
+/* Focus rings for accessibility */
+input:focus, select:focus, textarea:focus, button:focus-visible {
+  outline: none;
+}
+
+/* Smoother button/link transitions (specific, not universal) */
+button, a {
+  transition: background-color 0.2s, color 0.2s, box-shadow 0.2s, border-color 0.2s, transform 0.2s;
+}
+
+/* Table hover subtle */
+table {
+  border-collapse: separate;
+  border-spacing: 0;
+}
