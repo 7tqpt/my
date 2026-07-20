@@ -595,8 +595,8 @@ function buildRelatedSections(resource, item, ctx) {
       ],
       rows: tenantContracts,
     });
-    const contractPayments = payments
-  .filter((p) => p.contract_id === item.id)
+  const tenantPayments = payments
+  .filter((p) => p.tenant_id === item.id)
   .map((p) => ({
     ...p,
     due_date: p.due_date
