@@ -42,7 +42,14 @@ export default function Payments() {
     { key: 'amount', label: t('amount'), render: (r) => (
       <span className="font-bold text-gray-900 dark:text-white">{new Intl.NumberFormat().format(r.amount)} <span className="text-[10px] text-gray-400">{t('sar')}</span></span>
     )},
-    { key: 'due_date', label: t('due_date') },
+    {
+  key: 'due_date',
+  label: 'شهر الاستحقاق',
+  value: (r) => {
+    const d = new Date(r.due_date);
+    return `شهر ${d.getMonth() + 1} - ${d.getFullYear()}`;
+  }
+},
     { key: 'payment_date', label: t('payment_date'), render: (r) => r.payment_date || '-' },
     { key: 'type', label: t('type'), render: (r) => <span className="text-xs text-gray-600 dark:text-gray-400">{t(r.type)}</span> },
     { key: 'status', label: t('status'), render: (r) => <StatusBadge status={r.status} colorMap={{
