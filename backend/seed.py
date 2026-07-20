@@ -83,7 +83,7 @@ async def seed_all():
     # --- Skip demo data seeding if any owners exist ---
     if await coll_owners.count_documents({}) > 0:
         # But make sure utility bills exist even if other seed data was created earlier
-        await _seed_utility_bills_if_empty()
+       # await _seed_utility_bills_if_empty()
         return
 
     # --- Owners ---
@@ -229,33 +229,5 @@ async def seed_all():
             'created_at': now, 'updated_at': now,
         })
 
-    # --- Utility Bills (Electricity + Water) ---
-    utility_data = [
-        # (unit_key, tenant_key, type, provider, period_from, period_to, issue, due, pay_date, prev, cur, unit_price, amount, status)
-        ('u1', 't1', 'electricity', 'SEC', '2026-06-01', '2026-06-30', '2026-07-05', '2026-07-20', '2026-07-10', 1200.0, 1520.0, 0.30, 96.0, 'paid'),
-        ('u1', 't1', 'water', 'NWC', '2026-06-01', '2026-06-30', '2026-07-05', '2026-07-20', None, 340.0, 385.0, 4.00, 180.0, 'pending'),
-        ('u2', 't2', 'electricity', 'SEC', '2026-06-01', '2026-06-30', '2026-07-05', '2026-07-20', '2026-07-12', 800.0, 950.0, 0.30, 45.0, 'paid'),
-        ('u2', 't2', 'water', 'NWC', '2026-06-01', '2026-06-30', '2026-07-05', '2026-07-20', None, 210.0, 245.0, 4.00, 140.0, 'overdue'),
-        ('u3', 't3', 'electricity', 'SEC', '2026-06-01', '2026-06-30', '2026-07-05', '2026-07-20', '2026-07-08', 500.0, 620.0, 0.30, 36.0, 'paid'),
-        ('u4', 't4', 'electricity', 'SEC', '2026-06-01', '2026-06-30', '2026-07-05', '2026-07-20', None, 4500.0, 6300.0, 0.32, 576.0, 'pending'),
-        ('u4', 't4', 'water', 'NWC', '2026-06-01', '2026-06-30', '2026-07-05', '2026-07-20', '2026-07-11', 1200.0, 1450.0, 4.00, 1000.0, 'paid'),
-        ('u6', 't5', 'electricity', 'SEC', '2026-06-01', '2026-06-30', '2026-07-05', '2026-07-20', '2026-07-15', 2000.0, 2350.0, 0.30, 105.0, 'paid'),
-    ]
-    for ukey, tkey, btype, prov, pf, pt, issue, due, pd, prev, cur, price, amt, st in utility_data:
-        consumption = cur - prev
-        await coll_utility_bills.insert_one({
-            'id': new_id(),
-            'unit_id': unit_ids[ukey],
-            'tenant_id': tenant_ids[tkey],
-            'bill_type': btype,
-            'bill_number': f'{"ELEC" if btype == "electricity" else "WTR"}-{new_id()[:8].upper()}',
-            'provider': prov,
-            'period_from': pf, 'period_to': pt,
-            'issue_date': issue, 'due_date': due, 'payment_date': pd,
-            'previous_reading': prev, 'current_reading': cur,
-            'consumption': consumption,
-            'unit_price': price, 'amount': amt, 'late_fee': 0,
-            'status': st, 'payment_method': 'bank_transfer' if pd else None,
-            'notes': None,
-            'created_at': now, 'updated_at': now,
-        })
+  
+      
