@@ -389,8 +389,12 @@ function buildProfileFields(resource, item, ctx) {
         F(t('address'), item.address, { icon: MapPin, full: true }),
         F(t('land_area'), item.land_area ? `${fmtNum(item.land_area)} m²` : '-'),
         F(t('built_area'), item.built_area ? `${fmtNum(item.built_area)} m²` : '-'),
-        F(t('status'), <StatusPill status={item.status} map={{ active: { c: 'emerald', l: t('active') }, inactive: { c: 'gray', l: t('inactive') }, under_maintenance: { c: 'amber', l: t('under_maintenance') } }} />),
-        item.notes && F(t('notes'), item.notes, { full: true }),
+       F(
+  t('status'),
+  item.status === 'active' ? 'نشط' : 'غير نشط',
+  { icon: Shield }
+),
+item.notes && F(t('notes'), item.notes, { full: true }),
       ].filter(Boolean);
     case 'units': {
       const prop = properties.find((p) => p.id === item.property_id);
