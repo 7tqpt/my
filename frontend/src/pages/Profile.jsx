@@ -602,10 +602,12 @@ function buildRelatedSections(resource, item, ctx) {
         { key: 'reference_number', label: t('reference_number') },
         { key: 'amount', label: t('amount'), render: (r) => fmtNum(r.amount) },
       {
+{
   key: 'due_date',
   label: 'شهر الاستحقاق',
-  value: (r) => {
+  render: (r) => {
     if (!r.due_date) return '-';
+
     const d = new Date(r.due_date);
     return `شهر ${d.getMonth() + 1} - ${d.getFullYear()}`;
   },
@@ -635,8 +637,26 @@ function buildRelatedSections(resource, item, ctx) {
       columns: [
         { key: 'reference_number', label: t('reference_number') },
         { key: 'amount', label: t('amount'), render: (r) => fmtNum(r.amount) },
-        { key: 'due_date', label: t('due_date') },
-        { key: 'payment_date', label: t('payment_date') },
+       {
+  key: 'due_date',
+  label: 'شهر الاستحقاق',
+  render: (r) => {
+    if (!r.due_date) return '-';
+
+    const d = new Date(r.due_date);
+    return `شهر ${d.getMonth() + 1} - ${d.getFullYear()}`;
+  },
+},
+       {
+  key: 'payment_date',
+  label: 'شهر الدفع',
+  render: (r) => {
+    if (!r.payment_date) return '-';
+
+    const d = new Date(r.payment_date);
+    return `شهر ${d.getMonth() + 1} - ${d.getFullYear()}`;
+  },
+},
         { key: 'status', label: t('status'), render: (r) => t(r.status) },
       ],
       rows: contractPayments,
