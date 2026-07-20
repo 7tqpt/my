@@ -317,14 +317,24 @@ export default function Reports() {
         if (!tn) return;
         const unit = units.find(x => x.id === c.unit_id);
         const prop = unit ? properties.find(x => x.id === unit.property_id) : null;
-        const monthPayments = payments.filter(
-          p => p.contract_id === c.id && p.status === 'paid' && (p.payment_date || '').startsWith(ym)
-        );
-        const paid = monthPayments.reduce((s, p) => s + (p.amount || 0), 0);
-       const annualValue = c.rent_amount || 0;
-const monthlyRent = annualValue / 12;
+        const contractPayments = payments.filter(
+        p => p.contract_id === c.id && p.status === 'paid'
+           );
+
+           const paid = contractPayments.reduce(
+           (s, p) => s + (Number(p.amount) || 0),
+             0
+             );
+
+const annualValue = Number(c.rent_amount) || 0;
 const remaining = Math.max(0, annualValue - paid);
-        const status = paid >= monthlyRent ? 'paid' : (paid > 0 ? 'partial' : 'unpaid');
+
+const status =
+  paid >= annualValue
+    ? 'paid'
+    : paid > 0
+      ? 'partial'
+      : 'unpaid';
         rows.push({
           tenant: tn.name,
           phone: tn.phone,
