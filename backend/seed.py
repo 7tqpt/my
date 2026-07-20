@@ -62,12 +62,6 @@ async def seed_all():
             'email': 'admin@propertymgmt.com', 'role': 'admin', 'is_active': True,
             'password': hash_password('admin'), 'created_at': now, 'updated_at': now,
         })
-    if not await coll_users.find_one({'username': 'accountant'}):
-        await coll_users.insert_one({
-            'id': new_id(), 'name': 'محاسب النظام', 'username': 'accountant',
-            'email': 'acc@propertymgmt.com', 'role': 'user', 'is_active': True,
-            'password': hash_password('accountant'), 'created_at': now, 'updated_at': now,
-        })
 
     # --- Settings ---
     if not await coll_settings.find_one({'key': 'settings'}):
