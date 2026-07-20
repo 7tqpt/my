@@ -321,9 +321,9 @@ export default function Reports() {
           p => p.contract_id === c.id && p.status === 'paid' && (p.payment_date || '').startsWith(ym)
         );
         const paid = monthPayments.reduce((s, p) => s + (p.amount || 0), 0);
-        const monthlyRent = c.rent_amount || 0;
-        const annualValue = monthlyRent * 12;
-        const remaining = Math.max(0, monthlyRent - paid);
+       const annualValue = c.rent_amount || 0;
+const monthlyRent = annualValue / 12;
+const remaining = Math.max(0, annualValue - paid);
         const status = paid >= monthlyRent ? 'paid' : (paid > 0 ? 'partial' : 'unpaid');
         rows.push({
           tenant: tn.name,
