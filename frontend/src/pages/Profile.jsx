@@ -377,12 +377,13 @@ case 'owners':
     F(t('address'), item.address, { icon: MapPin, full: true }),
     F(t('bank_account'), item.bank_account, { icon: CreditCard, wide: true }),
 
-    F(
-      t('status'),
-      item.status === 'active' ? 'نشط' : 'غير نشط',
-      { icon: Shield }
-    ),
-
+  F(
+  t('status'),
+  item.status === 'active'
+    ? '<span style="color:#16a34a;font-weight:bold;">● نشط</span>'
+    : '<span style="color:#dc2626;font-weight:bold;">● غير نشط</span>',
+  { icon: Shield }
+),
     item.notes && F(t('notes'), item.notes, { full: true }),
   ].filter(Boolean);
 
