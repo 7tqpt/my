@@ -252,7 +252,15 @@ export default function Profile() {
             <Link to={cfg.backTo} className="px-4 py-2.5 bg-white/15 hover:bg-white/25 backdrop-blur-sm text-white rounded-xl font-semibold text-sm transition-all">
               {t('cancel')}
             </Link>
-            <button onClick={() => navigate(cfg.backTo, { state: { editId: id } })} className="flex items-center gap-2 px-4 py-2.5 bg-white text-gray-900 rounded-xl font-semibold text-sm shadow-lg hover:shadow-xl transition-all">
+            <button onClick={() => {
+  const target = items.find((x) => String(x.id) === String(id));
+  if (!target) return;
+  navigate(cfg.backTo, {
+    state: {
+      editRow: target
+    }
+  });
+}} className="flex items-center gap-2 px-4 py-2.5 bg-white text-gray-900 rounded-xl font-semibold text-sm shadow-lg hover:shadow-xl transition-all">
               <Edit2 size={14} />{t('edit')}
             </button>
           </div>

@@ -16,6 +16,16 @@ import { useApp } from '../context/AppContext';
 export default function CrudTable({ title, icon: Icon, color = 'blue', data, setData, columns, fields, filters = [], searchKeys = [], resource, extraActions, canDelete }) {
   const { t, lang } = useApp();
   const navigate = useNavigate();
+  import { useLocation } from 'react-router-dom';
+
+const location = useLocation();
+
+useEffect(() => {
+  if (location.state?.editRow) {
+    openEdit(location.state.editRow);
+    window.history.replaceState({}, '');
+  }
+}, [location.state]);
   const [search, setSearch] = useState('');
   const [activeFilters, setActiveFilters] = useState({});
   const [modalOpen, setModalOpen] = useState(false);
