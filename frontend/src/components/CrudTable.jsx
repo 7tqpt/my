@@ -272,11 +272,14 @@ function FormModal({ title, fields, initial, onClose, onSave, colorGrad }) {
   const submit = (e) => {
     e.preventDefault();
     const cleaned = { ...values };
-    fields.forEach((f) => {
-      if (f.type === 'number' && cleaned[f.name] !== '' && cleaned[f.name] != null) {
-        cleaned[f.name] = Number(cleaned[f.name]);
-      }
-    });
+   fields.forEach((f) => {
+  if (f.type === 'number') {
+    cleaned[f.name] =
+      cleaned[f.name] === '' || cleaned[f.name] == null
+        ? 0
+        : Number(cleaned[f.name]);
+  }
+});
     onSave(cleaned);
   };
 
