@@ -216,16 +216,29 @@ export function printReport(title, htmlBody, opts = {}) {
  */
 export function buildTable(columns, rows) {
   const th = columns.map((c) => `<th>${escapeHtml(c.label)}</th>`).join('');
+
   const trs = rows.map((r) => {
     const tds = columns.map((c) => {
-      const v = typeof c.value === 'function' ? c.value(r) : r[c.key];
+
+      let v = typeof c.value === 'function' ? c.value(r) : r[c.key];
+
+      if (
+        (c.key === 'due_date' || c.key === 'payment_date') &&
+        typeof v === 'string' &&
+        /^\d{4}-\d{2}-\d{2}$/.test(v)
+      ) {
+        const d = new Date(v);
+        v = `شهر ${d.getMonth() + 1} - ${d.getFullYear()}`;
+      }
+
       return `<td>${escapeHtml(v == null ? '' : String(v))}</td>`;
     }).join('');
+
     return `<tr>${tds}</tr>`;
   }).join('');
+
   return `<table><thead><tr>${th}</tr></thead><tbody>${trs}</tbody></table>`;
 }
-
 function escapeHtml(str) {
   return String(str)
     .replace(/&/g, '&amp;')
