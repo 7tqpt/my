@@ -367,18 +367,26 @@ function buildProfileFields(resource, item, ctx) {
   const { owners, properties, units, tenants, contracts, t } = ctx;
   const F = (label, value, opts = {}) => ({ label, value: value == null || value === '' ? '-' : value, ...opts });
 
-  switch (resource) {
-    case 'owners':
-      return [
-        F(t('name'), item.name, { icon: UserCog, wide: true }),
-        F(t('phone'), item.phone, { icon: Phone }),
-        F(t('national_id'), item.national_id, { icon: Hash }),
-        F(t('address'), item.address, { icon: MapPin, full: true }),
-        F(t('bank_account'), item.bank_account, { icon: CreditCard, wide: true }),
-        F(t('status'), <StatusPill status={item.status} map={{ active: { c: 'emerald', l: t('active') }, inactive: { c: 'gray', l: t('inactive') } }} />, { icon: Shield }),
-        item.notes && F(t('notes'), item.notes, { full: true }),
-      ].filter(Boolean);
-    case 'properties':
+ switch (resource) {
+
+case 'owners':
+  return [
+    F(t('name'), item.name, { icon: UserCog, wide: true }),
+    F(t('phone'), item.phone, { icon: Phone }),
+    F(t('national_id'), item.national_id, { icon: Hash }),
+    F(t('address'), item.address, { icon: MapPin, full: true }),
+    F(t('bank_account'), item.bank_account, { icon: CreditCard, wide: true }),
+
+    F(
+      t('status'),
+      item.status === 'active' ? 'نشط' : 'غير نشط',
+      { icon: Shield }
+    ),
+
+    item.notes && F(t('notes'), item.notes, { full: true }),
+  ].filter(Boolean);
+
+case 'properties':
       return [
         F(t('property_name'), item.name, { icon: Building2 }),
         F(t('owner'), owners.find((o) => o.id === item.owner_id)?.name || '-', { icon: UserCog }),
