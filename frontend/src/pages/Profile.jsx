@@ -601,7 +601,15 @@ function buildRelatedSections(resource, item, ctx) {
       columns: [
         { key: 'reference_number', label: t('reference_number') },
         { key: 'amount', label: t('amount'), render: (r) => fmtNum(r.amount) },
-        { key: 'due_date', label: t('due_date') },
+      {
+  key: 'due_date',
+  label: 'شهر الاستحقاق',
+  value: (r) => {
+    if (!r.due_date) return '-';
+    const d = new Date(r.due_date);
+    return `شهر ${d.getMonth() + 1} - ${d.getFullYear()}`;
+  },
+},
         { key: 'payment_date', label: t('payment_date') },
         { key: 'status', label: t('status'), render: (r) => t(r.status) },
       ],
