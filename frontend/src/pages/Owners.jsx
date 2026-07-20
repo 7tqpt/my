@@ -23,9 +23,19 @@ export default function Owners() {
     { key: 'phone', label: t('phone') },
     { key: 'address', label: t('address'), render: (r) => r.address || '-' },
     { key: 'bank_account', label: t('bank_account'), render: (r) => r.bank_account ? <span className="text-xs font-mono text-gray-600 dark:text-gray-400">{r.bank_account.slice(0, 12)}...</span> : '-' },
-    { key: 'status', label: t('status'), render: (r) => <StatusBadge status={r.status} colorMap={{ active: { color: 'green', label: t('active') }, inactive: { color: 'gray', label: t('inactive') }
-   }} /> },
-  ];
+    {
+  key: 'status',
+  label: t('status'),
+  render: (r) => (
+    <StatusBadge
+      status={r.status}
+      colorMap={{
+        active: { color: 'green', label: 'نشط' },
+        inactive: { color: 'red', label: 'غير نشط' }
+      }}
+    />
+  )
+},
 
   const fields = [
     { name: 'name', label: t('name'), type: 'text', required: true, colSpan: 2 },
