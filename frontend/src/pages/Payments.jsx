@@ -45,10 +45,12 @@ export default function Payments() {
     {
   key: 'due_date',
   label: 'شهر الاستحقاق',
-  value: (r) => {
+  render: (r) => {
+    if (!r.due_date) return '-';
+
     const d = new Date(r.due_date);
     return `شهر ${d.getMonth() + 1} - ${d.getFullYear()}`;
-  }
+  },
 },
     { key: 'payment_date', label: t('payment_date'), render: (r) => r.payment_date || '-' },
     { key: 'type', label: t('type'), render: (r) => <span className="text-xs text-gray-600 dark:text-gray-400">{t(r.type)}</span> },
