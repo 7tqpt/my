@@ -595,26 +595,36 @@ function buildRelatedSections(resource, item, ctx) {
       ],
       rows: tenantContracts,
     });
-    const tenantPayments = payments.filter((p) => p.tenant_id === item.id);
+    const contractPayments = payments
+  .filter((p) => p.contract_id === item.id)
+  .map((p) => ({
+    ...p,
+    due_date: p.due_date
+      ? `شهر ${new Date(p.due_date).getMonth() + 1} - ${new Date(p.due_date).getFullYear()}`
+      : '-',
+    payment_date: p.payment_date
+      ? `شهر ${new Date(p.payment_date).getMonth() + 1} - ${new Date(p.payment_date).getFullYear()}`
+      : '-',
+  }));
+ 
     list.push({
       title: t('payments'), icon: Wallet, tone: 'green', resource: 'payments',
-      columns: [
-        { key: 'reference_number', label: t('reference_number') },
-        { key: 'amount', label: t('amount'), render: (r) => fmtNum(r.amount) },
-      {
-{
-  key: 'due_date',
-  label: 'شهر الاستحقاق',
-  render: (r) => {
-    if (!r.due_date) return '-';
+   columns: [
+  { key: 'reference_number', label: t('reference_number') },
+  { key: 'amount', label: t('amount'), render: (r) => fmtNum(r.amount) },
 
-    const d = new Date(r.due_date);
-    return `شهر ${d.getMonth() + 1} - ${d.getFullYear()}`;
+  {
+    key: 'due_date',
+    label: 'شهر الاستحقاق',
   },
-},
-        { key: 'payment_date', label: t('payment_date') },
-        { key: 'status', label: t('status'), render: (r) => t(r.status) },
-      ],
+
+  {
+    key: 'payment_date',
+    label: 'شهر الدفع',
+  },
+
+  { key: 'status', label: t('status'), render: (r) => t(r.status) },
+],
       rows: tenantPayments,
     });
     const tenantBills = utilityBills.filter((b) => b.tenant_id === item.id);
