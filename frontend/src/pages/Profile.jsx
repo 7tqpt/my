@@ -556,7 +556,19 @@ function buildRelatedSections(resource, item, ctx) {
         { key: 'floor', label: t('floor') },
         { key: 'area', label: t('area'), render: (r) => `${r.area} m²` },
         { key: 'rent_price', label: t('rent_price'), render: (r) => fmtNum(r.rent_price) },
-        { key: 'status', label: t('status'), render: (r) => t(r.status) },
+        {
+  key: 'status',
+  label: t('status'),
+  render: (r) => {
+    const s = r.status;
+
+    if (typeof s === 'object' && s !== null) {
+      return s.label || s.name || t(s.value) || '';
+    }
+
+    return t(s);
+  },
+},
       ],
       rows: propUnits,
     });
