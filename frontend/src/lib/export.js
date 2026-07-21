@@ -231,7 +231,11 @@ export function buildTable(columns, rows) {
         v = `شهر ${d.getMonth() + 1} - ${d.getFullYear()}`;
       }
 
-      return `<td>${escapeHtml(v == null ? '' : String(v))}</td>`;
+     if (v && typeof v === 'object') {
+  v = v.label ?? v.name ?? v.value ?? JSON.stringify(v);
+}
+
+return `<td>${escapeHtml(v == null ? '' : String(v))}</td>`;
     }).join('');
 
     return `<tr>${tds}</tr>`;
