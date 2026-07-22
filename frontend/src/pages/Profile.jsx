@@ -482,7 +482,15 @@ item.notes && F(t('notes'), item.notes, { full: true }),
         F(t('rent_amount'), `${fmtNum(item.rent_amount)} ${t('sar')}`, { icon: DollarSign }),
         F(t('security_deposit'), item.security_deposit ? `${fmtNum(item.security_deposit)} ${t('sar')}` : '-'),
         F(t('payment_frequency'), t(item.payment_frequency || 'monthly')),
-        F(t('status'), <StatusPill status={item.status} map={{ active: { c: 'emerald', l: t('active') }, expired: { c: 'gray', l: t('expired') }, cancelled: { c: 'red', l: t('cancelled') }, pending: { c: 'amber', l: t('pending') } }} />),
+        F(
+          t('status'),
+            {
+           active: t('active'),
+             expired: t('expired'),
+          cancelled: t('cancelled'),
+          pending: t('pending')
+           }[item.status] || item.status
+             ),
         item.terms && F(t('notes'), item.terms, { full: true }),
       ].filter(Boolean);
     }
