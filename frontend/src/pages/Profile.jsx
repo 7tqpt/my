@@ -570,8 +570,24 @@ item.notes && F(t('notes'), item.notes, { full: true }),
         F(t('title'), item.title, { icon: Wrench, full: true }),
         F(t('property'), prop?.name || '-', { icon: Building2 }),
         F(t('unit'), unit?.unit_number || '-'),
-        F(t('priority'), <StatusPill status={item.priority} map={{ low: { c: 'gray', l: t('low') }, medium: { c: 'blue', l: t('medium') }, high: { c: 'amber', l: t('high') }, critical: { c: 'red', l: t('critical') } }} />),
-        F(t('status'), <StatusPill status={item.status} map={{ pending: { c: 'amber', l: t('pending') }, in_progress: { c: 'blue', l: t('in_progress') }, completed: { c: 'emerald', l: t('completed') }, cancelled: { c: 'gray', l: t('cancelled') } }} />),
+       F(
+  t('priority'),
+  {
+    low: t('low'),
+    medium: t('medium'),
+    high: t('high'),
+    critical: t('critical')
+  }[item.priority] || item.priority
+),
+       F(
+  t('status'),
+  {
+    pending: t('pending'),
+    in_progress: t('in_progress'),
+    completed: t('completed'),
+    cancelled: t('cancelled')
+  }[item.status] || item.status
+),
         F(t('reported_date'), fmtDate(item.reported_date), { icon: Calendar }),
         F(t('completed_date'), fmtDate(item.completed_date), { icon: Calendar }),
         F(t('cost'), item.cost ? `${fmtNum(item.cost)} ${t('sar')}` : '-'),
