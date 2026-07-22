@@ -524,16 +524,13 @@ item.notes && F(t('notes'), item.notes, { full: true }),
         F(t('expense_date'), fmtDate(item.expense_date), { icon: Calendar }),
         F(t('vendor'), item.vendor),
         F(t('reference_number'), item.reference_number),
-       F(
+      F(
   t('status'),
-  <StatusPill
-    status={item.status}
-    map={{
-      paid: { c: 'emerald', l: t('paid') },
-      pending: { c: 'amber', l: t('pending') },
-      approved: { c: 'blue', l: t('approved') }
-    }}
-  />
+  {
+    paid: t('paid'),
+    pending: t('pending'),
+    approved: t('approved')
+  }[item.status] || item.status
 ),
         item.notes && F(t('notes'), item.notes, { full: true }),
       ].filter(Boolean);
