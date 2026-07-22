@@ -460,7 +460,10 @@ item.notes && F(t('notes'), item.notes, { full: true }),
         F(t('national_id'), item.national_id, { icon: Hash }),
         F(t('company_name'), item.company_name, { icon: Building }),
         F(t('address'), item.address, { icon: MapPin, full: true }),
-        F(t('status'), <StatusPill status={item.status} map={{ active: { c: 'emerald', l: t('active') }, inactive: { c: 'gray', l: t('inactive') } }} />),
+       F(
+  t('status'),
+  item.status === 'active' ? 'نشط' : 'غير نشط'
+),
         item.notes && F(t('notes'), item.notes, { full: true }),
       ].filter(Boolean);
     case 'contracts': {
