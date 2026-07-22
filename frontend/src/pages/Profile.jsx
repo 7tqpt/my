@@ -505,7 +505,14 @@ item.notes && F(t('notes'), item.notes, { full: true }),
         F(t('due_date'), fmtDate(item.due_date), { icon: Calendar }),
         F(t('payment_date'), fmtDate(item.payment_date), { icon: Calendar }),
         F(t('late_fee'), item.late_fee ? `${fmtNum(item.late_fee)} ${t('sar')}` : '-'),
-        F(t('status'), <StatusPill status={item.status} map={{ paid: { c: 'emerald', l: t('paid') }, pending: { c: 'amber', l: t('pending') }, overdue: { c: 'red', l: t('overdue') } }} />),
+        F(
+  t('status'),
+  {
+    paid: t('paid'),
+    pending: t('pending'),
+    overdue: t('overdue')
+  }[item.status] || item.status
+),
         item.notes && F(t('notes'), item.notes, { full: true }),
       ].filter(Boolean);
     case 'expenses':
