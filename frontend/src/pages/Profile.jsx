@@ -178,19 +178,39 @@ export default function Profile() {
     `;
 
     // Details grid
-    const detailsHtml = `
-      <h2 style="font-size:15px; margin: 18px 0 8px; padding: 6px 10px; background:#f1f5f9; border-radius: 8px;">${isRTL ? 'البيانات الأساسية' : 'Basic Information'}</h2>
-      <table style="border:none;">
-        <tbody>
-          ${fields.reduce((acc, f, i) => {
-            const cell = `<td style="border:1px solid #e5e7eb; padding:8px 12px; background:#f9fafb; width:25%;"><b>${f.label}</b></td><td style="border:1px solid #e5e7eb; padding:8px 12px; width:25%;">${f.value == null ? '-' : String(f.value)}</td>`;
-            if (i % 2 === 0) return acc + `<tr>${cell}`;
-            return acc + `${cell}</tr>`;
-          }, '')}
-          ${fields.length % 2 === 1 ? '<td colspan="2" style="border:1px solid #e5e7eb;"></td></tr>' : ''}
-        </tbody>
-      </table>
-    `;
+  const detailsHtml = `
+  <h2 style="font-size:15px; margin:18px 0 8px; padding:6px 10px; background:#f1f5f9; border-radius:8px;">
+    ${isRTL ? 'البيانات الأساسية' : 'Basic Information'}
+  </h2>
+
+  <table style="border:none;">
+    <tbody>
+      ${fields.reduce((acc, f, i) => {
+
+        const value =
+          typeof f.value === 'string'
+            ? f.value
+            : React.isValidElement(f.value)
+              ? f.value.props.children
+              : '-';
+
+        const cell = `
+          <td style="border:1px solid #e5e7eb; padding:8px 12px; background:#f9fafb; width:25%;">
+            <b>${f.label}</b>
+          </td>
+          <td style="border:1px solid #e5e7eb; padding:8px 12px; width:25%;">
+            ${value}
+          </td>
+        `;
+
+        if (i % 2 === 0) return acc + `<tr>${cell}`;
+        return acc + `${cell}</tr>`;
+      }, '')}
+
+      ${fields.length % 2 === 1 ? '<td colspan="2" style="border:1px solid #e5e7eb;"></td></tr>' : ''}
+    </tbody>
+  </table>
+`;
 
     // Every related section with its own totals block
     const sectionsHtml = related.map((sec) => {
@@ -421,7 +441,15 @@ item.notes && F(t('notes'), item.notes, { full: true }),
         F(t('rooms'), fmtNum(item.rooms)),
         F(t('bathrooms'), fmtNum(item.bathrooms)),
         F(t('rent_price'), `${fmtNum(item.rent_price)} ${t('sar')}`, { icon: DollarSign }),
-        F(t('status'), <StatusPill status={item.status} map={{ vacant: { c: 'red', l: t('vacant') }, rented: { c: 'emerald', l: t('rented') }, under_maintenance: { c: 'amber', l: t('under_maintenance') }, reserved: { c: 'blue', l: t('reserved') } }} />),
+        F(
+  t('status'),
+  {
+    vacant: t('vacant'),
+    rented: t('rented'),
+    under_maintenance: t('under_maintenance'),
+    reserved: t('reserved')
+  }[item.status] || item.status
+),
         item.notes && F(t('notes'), item.notes, { full: true }),
       ].filter(Boolean);
     }
