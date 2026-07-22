@@ -38,7 +38,7 @@ export default function Properties() {
       const rented = propUnits.filter(u => u.status === 'rented').length;
       return <span className="text-sm font-semibold text-gray-900 dark:text-white">{rented}/{total}</span>;
     }},
-    { key: 'status', label: t('status'), render: (r) => <StatusBadge status={r.status} colorMap={{ active: { color: 'green', label: t('active') }, inactive: { color: 'gray', label: t('inactive') }, under_maintenance: { color: 'amber', label: t('under_maintenance') } }} /> },
+    { key: 'status', label: t('status'), render: (r) => <StatusBadge status={r.status} colorMap={{ active: { color: 'green', label: t('active') }, inactive: { color: 'red', label: t('inactive') }, under_maintenance: { color: 'amber', label: t('under_maintenance') } }} /> },
   ];
 
   const fields = [
