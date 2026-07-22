@@ -601,8 +601,17 @@ item.notes && F(t('notes'), item.notes, { full: true }),
         F(t('name'), item.name, { icon: UsersRound, wide: true }),
         F(t('username'), item.username, { icon: Hash }),
         F(t('email'), item.email, { icon: Mail, wide: true }),
-        F(t('role'), <StatusPill status={item.role} map={{ admin: { c: 'purple', l: t('admin') }, user: { c: 'blue', l: t('user') } }} />),
-        F(t('status'), <StatusPill status={item.is_active ? 'active' : 'inactive'} map={{ active: { c: 'emerald', l: t('active') }, inactive: { c: 'gray', l: t('inactive') } }} />),
+       F(
+  t('role'),
+  {
+    admin: t('admin'),
+    user: t('user')
+  }[item.role] || item.role
+),
+       F(
+  t('status'),
+  item.is_active ? t('active') : t('inactive')
+),
       ];
     default:
       return [];
