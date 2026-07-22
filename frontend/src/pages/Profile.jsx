@@ -187,16 +187,14 @@ export default function Profile() {
     <tbody>
       ${fields.reduce((acc, f, i) => {
 
-     const value =
+  const value =
   typeof f.value === 'string'
     ? f.value
     : React.isValidElement(f.value)
       ? (
-          typeof f.value.props.children === 'string'
-            ? f.value.props.children
-            : f.value.props.children?.props?.children ||
-              f.value.props.label ||
-              'غير نشط'
+          Array.isArray(f.value.props.children)
+            ? f.value.props.children.join('')
+            : f.value.props.children
         )
       : '-';
 
