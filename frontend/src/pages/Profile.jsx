@@ -187,12 +187,18 @@ export default function Profile() {
     <tbody>
       ${fields.reduce((acc, f, i) => {
 
-        const value =
-          typeof f.value === 'string'
-            ? f.value
-            : React.isValidElement(f.value)
-              ? f.value.props.children
-              : '-';
+     const value =
+  typeof f.value === 'string'
+    ? f.value
+    : React.isValidElement(f.value)
+      ? (
+          typeof f.value.props.children === 'string'
+            ? f.value.props.children
+            : f.value.props.children?.props?.children ||
+              f.value.props.label ||
+              'غير نشط'
+        )
+      : '-';
 
         const cell = `
           <td style="border:1px solid #e5e7eb; padding:8px 12px; background:#f9fafb; width:25%;">
