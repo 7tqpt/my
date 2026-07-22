@@ -23,7 +23,7 @@ export default function Tenants() {
     { key: 'phone', label: t('phone') },
     { key: 'company_name', label: t('company_name'), render: (r) => r.company_name || '-' },
     { key: 'address', label: t('address'), render: (r) => r.address || '-' },
-    { key: 'status', label: t('status'), render: (r) => <StatusBadge status={r.status} colorMap={{ active: { color: 'green', label: t('active') }, inactive: { color: 'gray', label: t('inactive') } }} /> },
+    { key: 'status', label: t('status'), render: (r) => <StatusBadge status={r.status} colorMap={{ active: { color: 'green', label: t('active') }, inactive: { color: 'red', label: t('inactive') } }} /> },
   ];
 
   const fields = [
