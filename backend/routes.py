@@ -560,6 +560,13 @@ async def update_user(item_id: str, payload: UserUpdate, user: dict = Depends(re
     if not existing:
         raise HTTPException(404, 'User not found')
     update = payload.dict(exclude_unset=True)
+    if update.get("username"):
+    exists = await coll_users.find_one({
+        "username": update["username"],
+        "id": {"$ne": item_id}
+    })
+    if exists:
+        raise HTTPException(409, "اسم المستخدم مستخدم بالفعل")
     if update.get('name'):
         await _ensure_person_unique(name=update.get('name'), exclude=('users', item_id))
     if 'password' in update and update['password']:
