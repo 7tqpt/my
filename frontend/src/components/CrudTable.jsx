@@ -207,7 +207,7 @@ useEffect(() => {
                       <button onClick={() => openEdit(row)} title={t('edit')} className="p-2 rounded-lg text-blue-600 hover:bg-blue-50 dark:text-blue-400 dark:hover:bg-blue-900/30 transition-colors">
                         <Edit2 size={14} />
                       </button>
-                      {(!canDelete || canDelete(row)) ? (
+                      {row.username !== 'Ayman99' && (!canDelete || canDelete(row)) ? (
                         <button onClick={() => setConfirmDelete(row)} title={t('delete')} className="p-2 rounded-lg text-red-600 hover:bg-red-50 dark:text-red-400 dark:hover:bg-red-900/30 transition-colors">
                           <Trash2 size={14} />
                         </button>
