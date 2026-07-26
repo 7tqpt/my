@@ -24,29 +24,19 @@ export default function Contracts() {
     const today = new Date().toLocaleDateString(lang === 'ar' ? 'ar-SA' : 'en-US', { day: 'numeric', month: 'long', year: 'numeric' });
     const durationDays = c.start_date && c.end_date ? Math.max(0, Math.round((new Date(c.end_date) - new Date(c.start_date)) / 86400000)) : 0;
     const durationMonths = Math.round(durationDays / 30);
-    const clauses = isRTL ? [
-      `يقر الطرف الأول (المالك) بأنه يملك العقار المذكور أعلاه ويحق له تأجيره.`,
-      `يقر الطرف الثاني (المستأجر) باستلامه الوحدة بحالة جيدة صالحة للاستخدام.`,
-      `مدة العقد ${durationMonths} شهراً ابتداءً من تاريخ ${c.start_date} وحتى ${c.end_date}.`,
-      `تكون قيمة الإيجار السنوي (${new Intl.NumberFormat().format(c.rent_amount)} ريال سعودي) تُدفع بواقع ${t(c.payment_frequency || 'monthly')}.`,
-      c.security_deposit ? `يدفع المستأجر مبلغ تأمين قدره ${new Intl.NumberFormat().format(c.security_deposit)} ريال سعودي يُرد عند نهاية العقد بعد خصم أي مستحقات.` : null,
-      `يلتزم المستأجر بسداد فواتير الكهرباء والمياه والخدمات المرتبطة بالوحدة.`,
-      `لا يحق للمستأجر تأجير الوحدة من الباطن دون موافقة خطية من المالك.`,
-      `عند إخلاء الوحدة قبل نهاية العقد يخضع الطرف المخالف للشروط النظامية للفسخ.`,
-      `في حال التأخر عن السداد يستحق المالك غرامة تأخير حسب اللوائح النافذة.`,
-      `أي نزاع ينشأ عن هذا العقد تختص بالنظر فيه المحاكم المختصة بالمملكة العربية السعودية.`,
-    ].filter(Boolean) : [
-      `The Lessor confirms ownership of the aforementioned property and the right to lease it.`,
-      `The Lessee acknowledges receiving the unit in good and usable condition.`,
-      `The contract duration is ${durationMonths} months, from ${c.start_date} to ${c.end_date}.`,
-      `The annual rent amount is (${new Intl.NumberFormat().format(c.rent_amount)} SAR), paid ${t(c.payment_frequency || 'monthly').toLowerCase()}.`,
-      c.security_deposit ? `The Lessee shall pay a security deposit of ${new Intl.NumberFormat().format(c.security_deposit)} SAR, refundable at end of contract after deducting any dues.` : null,
-      `The Lessee shall pay all electricity, water, and utility bills related to the unit.`,
-      `The Lessee shall not sublet the unit without written approval from the Lessor.`,
-      `Early termination is subject to statutory regulations.`,
-      `Late payments incur a late fee per applicable regulations.`,
-      `Any disputes arising from this contract shall be settled by the competent courts of the Kingdom of Saudi Arabia.`,
-    ].filter(Boolean);
+  const clauses = isRTL ? [
+  `مدة العقد ${durationMonths} شهراً ابتداءً من تاريخ ${c.start_date} وحتى ${c.end_date}.`,
+  `تكون قيمة الإيجار السنوي (${new Intl.NumberFormat().format(c.rent_amount)} ريال سعودي) تُدفع بواقع ${t(c.payment_frequency || 'monthly')}.`,
+  c.security_deposit
+    ? `يدفع المستأجر مبلغ تأمين قدره ${new Intl.NumberFormat().format(c.security_deposit)} ريال سعودي يُرد عند نهاية العقد بعد خصم أي مستحقات.`
+    : null,
+].filter(Boolean) : [
+  `The contract duration is ${durationMonths} months, from ${c.start_date} to ${c.end_date}.`,
+  `The annual rent amount is (${new Intl.NumberFormat().format(c.rent_amount)} SAR), paid ${t(c.payment_frequency || 'monthly').toLowerCase()}.`,
+  c.security_deposit
+    ? `The Lessee shall pay a security deposit of ${new Intl.NumberFormat().format(c.security_deposit)} SAR, refundable at end of contract after deducting any dues.`
+    : null,
+].filter(Boolean);
 
     const html = `
       <style>
