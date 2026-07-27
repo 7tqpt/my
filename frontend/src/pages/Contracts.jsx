@@ -66,16 +66,16 @@ body {
         .doc-section { margin-top: 2px; }
         .doc-section h3 { font-size: 15px; color: #1e40af; margin: 0 0 10px; padding: 6px 12px; background: #eff6ff; border-radius: 8px; border-inline-start: 3px solid #1e40af; }
         .doc-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px 20px; padding: 4px 8px; }
-        .doc-grid > div { display: flex; gap: 8px; font-size: 14px; padding: 2px 0; border-bottom: 1px dotted #e2e8f0; }
+        .doc-grid > div { display: flex; gap: 8px; font-size: 13px; padding: 1px 0; border-bottom: 1px dotted #e2e8f0; }
         .doc-grid label { color: #64748b; min-width: 110px; font-weight: 600; }
         .doc-grid span { color: #0f172a; font-weight: 700; flex: 1; }
         .clauses { padding: 0; margin: 0; counter-reset: cnt; list-style: none; }
-        .clauses li { position: relative; padding: 8px 0 8px 28px; font-size: 15px; line-height: 1.2; counter-increment: cnt; }
+        .clauses li { position: relative; padding: 8px 0 8px 28px; font-size: 13px; line-height: 1.2; counter-increment: cnt; }
         .clauses li::before { content: counter(cnt); position: absolute; inset-inline-start: 0; top: 6px; width: 20px; height: 20px; background: #1e40af; color: white; border-radius: 50%; font-size: 10px; font-weight: 800; display: flex; align-items: center; justify-content: center; }
         html[dir="rtl"] .clauses li { padding: 8px 28px 8px 0; }
         html[dir="rtl"] .clauses li::before { inset-inline-start: auto; inset-inline-end: 0; }
         .sig-block { margin-top: 10px; display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
-        .sig-block .sig { text-align: center; padding: 12px 10px 10px; border: 1px dashed #cbd5e1; border-radius: 10px; }
+        .sig-block .sig { text-align: center; padding: 6px 10px 10px; border: 1px dashed #cbd5e1; border-radius: 10px; }
         .sig-block .sig .role { font-size: 10px; color: #64748b; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 4px; }
         .sig-block .sig .name { font-size: 13px; font-weight: 800; color: #0f172a; }
         .sig-block .sig .line { border-top: 1px solid #94a3b8; margin-top: 20px; padding-top: 6px; font-size: 10px; color: #64748b; }
