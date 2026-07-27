@@ -62,7 +62,9 @@ body {
 
         .doc-title { text-align: center; margin: 0 0 8px; font-size: 26px; color: #1e3a8a; letter-spacing: 0.5px; }
         .doc-sub { text-align: center; color: #64748b; font-size: 12px; margin-bottom: 8px; }
-        .doc-hr { height: 3px; background: linear-gradient(90deg, #1e40af, #4f46e5, #1e40af); border-radius: 2px; margin: 8px 0; }
+        .doc-hr {
+    display: none;
+}
         .doc-section { margin-top: 2px; }
         .doc-section h3 { font-size: 15px; color: #1e40af; margin: 0 0 10px; padding: 6px 12px; background: #eff6ff; border-radius: 8px; border-inline-start: 3px solid #1e40af; }
         .doc-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px 20px; padding: 4px 8px; }
