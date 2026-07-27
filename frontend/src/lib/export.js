@@ -192,7 +192,7 @@ export function printReport(title, htmlBody, opts = {}) {
 
 body {
     font-family: 'Tajawal','Cairo',sans-serif;
-    margin: 24px;
+    margin: 15px;
     
     color: #111827;
    
@@ -207,9 +207,11 @@ body {
       .stamp { display:flex; justify-content: space-between; align-items:center; margin-bottom: 16px; padding: 12px 16px; border-radius: 12px; background: linear-gradient(135deg,#2563eb 0%,#4f46e5 100%); color:white; }
       .stamp .label { font-size: 11px; opacity: 0.85; }
       .stamp .value { font-size: 18px; font-weight: 800; }
-   @media print {
+      @media print {
     body {
-        margin: 0;
+        margin: 15mm !important;
+        -webkit-print-color-adjust: exact;
+        print-color-adjust: exact;
     }
 
     .no-print {
