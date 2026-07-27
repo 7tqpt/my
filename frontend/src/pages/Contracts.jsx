@@ -55,7 +55,7 @@ html, body {
         .doc-frame {
     width: 100%;
     max-width: 190mm;
-    min-height: 267mm;
+    min-height: auto;
     margin: 0 auto;
     box-sizing: border-box;
     border: 2px solid #1e40af;
@@ -76,7 +76,7 @@ html, body {
         .clauses li::before { content: counter(cnt); position: absolute; inset-inline-start: 0; top: 6px; width: 20px; height: 20px; background: #1e40af; color: white; border-radius: 50%; font-size: 10px; font-weight: 800; display: flex; align-items: center; justify-content: center; }
         html[dir="rtl"] .clauses li { padding: 8px 28px 8px 0; }
         html[dir="rtl"] .clauses li::before { inset-inline-start: auto; inset-inline-end: 0; }
-        .sig-block { margin-top: 20px; display: grid; grid-template-columns: 1fr 1fr; gap: 30px; }
+        .sig-block { margin-top: 10px; display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
         .sig-block .sig { text-align: center; padding: 20px 10px 10px; border: 1px dashed #cbd5e1; border-radius: 10px; }
         .sig-block .sig .role { font-size: 10px; color: #64748b; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 4px; }
         .sig-block .sig .name { font-size: 13px; font-weight: 800; color: #0f172a; }
