@@ -192,7 +192,7 @@ export function printReport(title, htmlBody, opts = {}) {
 
 body {
     font-family: 'Tajawal','Cairo',sans-serif;
-    margin: 15px;
+    margin: 15mm;
     
     color: #111827;
    
