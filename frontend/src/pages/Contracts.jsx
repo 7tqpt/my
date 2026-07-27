@@ -40,7 +40,28 @@ export default function Contracts() {
 
     const html = `
       <style>
-        .doc-frame { border: 2px solid #1e40af; border-radius: 12px; padding: 28px; margin-top: 8px; }
+      @page {
+  size: A4;
+  margin: 15mm;
+}
+
+html, body {
+  width: 210mm;
+  min-height: 297mm;
+  margin: 0;
+  padding: 0;
+  background: #fff;
+}
+        .doc-frame {
+    width: 100%;
+    max-width: 190mm;
+    min-height: 267mm;
+    margin: 0 auto;
+    box-sizing: border-box;
+    border: 2px solid #1e40af;
+    border-radius: 12px;
+    padding: 20px;
+}
         .doc-title { text-align: center; margin: 0 0 8px; font-size: 22px; color: #1e3a8a; letter-spacing: 0.5px; }
         .doc-sub { text-align: center; color: #64748b; font-size: 12px; margin-bottom: 20px; }
         .doc-hr { height: 3px; background: linear-gradient(90deg, #1e40af, #4f46e5, #1e40af); border-radius: 2px; margin: 16px 0; }
