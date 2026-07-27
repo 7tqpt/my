@@ -85,7 +85,20 @@ body {
         .stamp-doc .n { font-size: 11px; opacity: 0.85; }
         .stamp-doc .v { font-size: 20px; font-weight: 800; letter-spacing: 0.5px; }
         .highlight { background: #fef3c7; padding: 2px 6px; border-radius: 4px; font-weight: 800; color: #92400e; }
-      </style>
+        
+@media print {
+  * {
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
+
+  .doc-frame {
+    border: 2px solid #1e40af !important;
+    box-shadow: inset 0 0 0 2px #1e40af !important;
+  }
+}
+        </style>
+
       
       <div class="doc-frame">
       <div style="
