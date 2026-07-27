@@ -91,9 +91,15 @@ body {
   }
 
   .doc-frame {
-    border: 2px solid #1e40af !important;
-    box-shadow: inset 0 0 0 2px #1e40af !important;
-  }
+    width: 100%;
+    margin: 0 auto;
+    box-sizing: border-box;
+    padding: 6px 10px;
+    background: #fff;
+    border: none !important;
+    outline: none !important;
+    box-shadow: none !important;
+}
 }
         </style>
 
