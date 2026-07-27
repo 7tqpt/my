@@ -78,7 +78,7 @@ body {
         .sig-block .sig { text-align: center; padding: 6px 10px 10px; border: 1px dashed #cbd5e1; border-radius: 10px; }
         .sig-block .sig .role { font-size: 10px; color: #64748b; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 4px; }
         .sig-block .sig .name { font-size: 13px; font-weight: 800; color: #0f172a; }
-        .sig-block .sig .line { border-top: 1px solid #94a3b8; margin-top: 20px; padding-top: 6px; font-size: 10px; color: #64748b; }
+        .sig-block .sig .line { border-top: 1px solid #94a3b8; margin-top: 15px; padding-top: 6px; font-size: 10px; color: #64748b; }
         .stamp-doc { display: flex; justify-content: space-between; align-items: center; padding: 14px 18px; border-radius: 12px; background: linear-gradient(135deg,#1e40af 0%,#4f46e5 100%); color: white; margin-bottom: 6px; }
         .stamp-doc .n { font-size: 11px; opacity: 0.85; }
         .stamp-doc .v { font-size: 20px; font-weight: 800; letter-spacing: 0.5px; }
