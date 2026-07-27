@@ -189,17 +189,13 @@ export function printReport(title, htmlBody, opts = {}) {
     <style>
       @import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&family=Tajawal:wght@400;500;700&display=swap');
       * { box-sizing: border-box; }
-      @page {
-    size: A4;
-    margin: 8mm;
-}
 
 body {
     font-family: 'Tajawal','Cairo',sans-serif;
-    margin: 0;
-    padding: 0;
+    margin: 24px;
+    
     color: #111827;
-    background: #fff;
+   
 }
       h1 { font-size: 20px; margin: 0 0 4px; }
       .subtitle { color: #6b7280; font-size: 12px; margin-bottom: 20px; }
@@ -211,13 +207,9 @@ body {
       .stamp { display:flex; justify-content: space-between; align-items:center; margin-bottom: 16px; padding: 12px 16px; border-radius: 12px; background: linear-gradient(135deg,#2563eb 0%,#4f46e5 100%); color:white; }
       .stamp .label { font-size: 11px; opacity: 0.85; }
       .stamp .value { font-size: 18px; font-weight: 800; }
-      @media print {
-    html, body {
-        width: 210mm;
-        height: 297mm;
+   @media print {
+    body {
         margin: 0;
-        padding: 0;
-        overflow: hidden;
     }
 
     .no-print {
