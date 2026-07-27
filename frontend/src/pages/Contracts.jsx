@@ -53,7 +53,7 @@ html, body {
 }
    .doc-frame {
     width: 100%;
-    max-width: 190mm;
+    max-width: 100mm;
     margin: 0 auto;
     box-sizing: border-box;
     border: 2px solid #1e40af;
