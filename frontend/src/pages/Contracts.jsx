@@ -52,23 +52,25 @@ body {
   padding: 0;
   background: #fff;
 }
-
 .doc-frame {
-    outline: 2px solid #1e40af;
-    outline-offset: -2px;
-    border: none;
+  width: 100%;
+  margin: 0 auto;
+  box-sizing: border-box;
+  padding: 8px 12px;
+  background: #fff;
 }
-        .doc-title { text-align: center; margin: 0 0 8px; font-size: 22px; color: #1e3a8a; letter-spacing: 0.5px; }
+
+        .doc-title { text-align: center; margin: 0 0 8px; font-size: 30px; color: #1e3a8a; letter-spacing: 0.5px; }
         .doc-sub { text-align: center; color: #64748b; font-size: 12px; margin-bottom: 20px; }
         .doc-hr { height: 3px; background: linear-gradient(90deg, #1e40af, #4f46e5, #1e40af); border-radius: 2px; margin: 16px 0; }
         .doc-section { margin-top: 8px; }
-        .doc-section h3 { font-size: 13px; color: #1e40af; margin: 0 0 10px; padding: 6px 12px; background: #eff6ff; border-radius: 8px; border-inline-start: 3px solid #1e40af; }
+        .doc-section h3 { font-size: 15px; color: #1e40af; margin: 0 0 10px; padding: 6px 12px; background: #eff6ff; border-radius: 8px; border-inline-start: 3px solid #1e40af; }
         .doc-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px 20px; padding: 4px 8px; }
-        .doc-grid > div { display: flex; gap: 8px; font-size: 10px; padding: 3px 0; border-bottom: 1px dotted #e2e8f0; }
+        .doc-grid > div { display: flex; gap: 8px; font-size: 14px; padding: 5px 0; border-bottom: 1px dotted #e2e8f0; }
         .doc-grid label { color: #64748b; min-width: 110px; font-weight: 600; }
         .doc-grid span { color: #0f172a; font-weight: 700; flex: 1; }
         .clauses { padding: 0; margin: 0; counter-reset: cnt; list-style: none; }
-        .clauses li { position: relative; padding: 8px 0 8px 28px; font-size: 12px; line-height: 1.7; counter-increment: cnt; }
+        .clauses li { position: relative; padding: 8px 0 8px 28px; font-size: 15px; line-height: 2; counter-increment: cnt; }
         .clauses li::before { content: counter(cnt); position: absolute; inset-inline-start: 0; top: 6px; width: 20px; height: 20px; background: #1e40af; color: white; border-radius: 50%; font-size: 10px; font-weight: 800; display: flex; align-items: center; justify-content: center; }
         html[dir="rtl"] .clauses li { padding: 8px 28px 8px 0; }
         html[dir="rtl"] .clauses li::before { inset-inline-start: auto; inset-inline-end: 0; }
