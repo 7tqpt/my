@@ -54,13 +54,14 @@ body {
 }
 
 .doc-frame {
-  width: 100%;
+  width: calc(100% - 4px);
   max-width: 190mm;
   margin: 0 auto;
   box-sizing: border-box;
-  border: 2px solid #1e40af;
+  border: 2px solid #1e40af !important;
   border-radius: 12px;
   padding: 12px;
+  background: #fff;
 }
         .doc-title { text-align: center; margin: 0 0 8px; font-size: 22px; color: #1e3a8a; letter-spacing: 0.5px; }
         .doc-sub { text-align: center; color: #64748b; font-size: 12px; margin-bottom: 20px; }
