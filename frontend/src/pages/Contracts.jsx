@@ -86,17 +86,29 @@ body {
         .stamp-doc .v { font-size: 20px; font-weight: 800; letter-spacing: 0.5px; }
         .highlight { background: #fef3c7; padding: 2px 6px; border-radius: 4px; font-weight: 800; color: #92400e; }
       </style>
-      <div class="stamp-doc">
-        <div>
-          <div class="n">${isRTL ? 'رقم العقد' : 'Contract No.'}</div>
-          <div class="v">${c.contract_number}</div>
-        </div>
-        <div style="text-align:end;">
-          <div class="n">${isRTL ? 'تاريخ الإصدار' : 'Issue Date'}</div>
-          <div class="v" style="font-size:14px;">${today}</div>
-        </div>
-      </div>
+      
       <div class="doc-frame">
+      <div style="
+display:flex;
+justify-content:space-between;
+align-items:flex-start;
+margin-bottom:12px;
+font-size:13px;
+font-weight:700;
+color:#1e40af;
+">
+
+<div>
+<div style="font-size:11px;color:#64748b;">تاريخ الإصدار</div>
+<div>${today}</div>
+</div>
+
+<div style="text-align:end">
+<div style="font-size:11px;color:#64748b;">رقم العقد</div>
+<div>${c.contract_number}</div>
+</div>
+
+</div>
         <h1 class="doc-title">${isRTL ? 'عقد إيجار وحدة عقارية' : 'Real-Estate Rental Contract'}</h1>
         <p class="doc-sub">${isRTL ? 'المملكة العربية السعودية - بسم الله الرحمن الرحيم' : 'Kingdom of Saudi Arabia'}</p>
         <div class="doc-hr"></div>
